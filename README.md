@@ -36,6 +36,11 @@ DeleteObject = 객체 삭제
 DeleteDC = 메모리 로딩 DC 해제
 EndPaint = 그리기 DC 해제
 
+SetBkMode = 글씨 그릴 때 배경 설정 (TRANSPARENT = 배경 투명하게, OPAQUE = 배경 흰색)
+TextOut = 글씨 그리기
+
+CreateFontIndirect -> LOGFONT 구조체로 VS 내에 저장된 폰트 불러오기
+
 # 아직 정리 못함
 
 CALLBACK = 콜백 함수
@@ -47,4 +52,6 @@ CB_GETLBTEXT = CB에서 검색할 문자열의 인덱스
 
 SetWindowText = 타이틀 창 이름 바꾸기
 MAKELONG = LONG 타입 만들어서 변환
-ZeroMemory = 구조체 초기화 
+ZeroMemory = 구조체 초기화
+
+wcscpy_s -> 유니코드 스트링 카피해서 붙이기

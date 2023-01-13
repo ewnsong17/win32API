@@ -139,11 +139,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CmdProc.cpp" />
     <ClCompile Include="GameApp.cpp" />
     <ClCompile Include="GameProc.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CmdProc.h" />
     <ClInclude Include="GameApp.h" />
     <ClInclude Include="GameProc.h" />
   </ItemGroup>

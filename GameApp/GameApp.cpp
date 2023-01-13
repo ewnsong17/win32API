@@ -51,6 +51,10 @@ INT CreateWndClass(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszcmPar
 
 		return (int)msg.wParam;
 	}
+	else
+	{
+		MessageBox(nullptr, L"윈도우 창을 열지 못했습니다.", L"오류", MB_OK);
+	}
 
 	return 0;
 }

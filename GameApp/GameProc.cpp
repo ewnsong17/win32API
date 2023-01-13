@@ -1,9 +1,6 @@
 #include "GameProc.h"
 #include "GameApp.h"
-
-VOID ChangeStaticColor(WPARAM wParam, LPARAM lParam)
-{
-}
+#include "CmdProc.h"
 
 VOID CreateBackGround(HWND hWnd)
 {
@@ -12,14 +9,19 @@ VOID CreateBackGround(HWND hWnd)
 
 	HDC hdc = BeginPaint(hWnd, &ps);
 	HDC hMemDC = CreateCompatibleDC(hdc);
-	HBITMAP hBit = (HBITMAP)LoadImage(NULL, L"background.jpg", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
 
+	//배경화면 그리기
+	HBITMAP hBit = (HBITMAP)LoadImage(NULL, L"background.jpg", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
 	GetObject(hBit, sizeof(bit), &bit);
 	HBITMAP hOld = (HBITMAP)SelectObject(hMemDC, hBit);
 	BitBlt(hdc, 0, 0, 640, 640, hMemDC, 0, 0, SRCCOPY);
 	SelectObject(hMemDC, hOld);
 	DeleteObject(hBit);
 
+	//텍스트 폰트 지정하기
+	oldFont = (HFONT)SelectObject(hdc, hFont);
+
+	//글씨 그리기
 	SetBkMode(hdc, TRANSPARENT);
 	TextOut(hdc, 245, 65, titleText, wcslen(titleText));
 
@@ -29,6 +31,12 @@ VOID CreateBackGround(HWND hWnd)
 
 VOID CreateSystemClasses(HWND hWnd)
 {
+	//폰트 로딩하기
+	LOGFONT lf;
+	ZeroMemory(&lf, sizeof(lf));
+	wcscpy_s(lf.lfFaceName, L"HY엽서M");
+	hFont = CreateFontIndirect(&lf);
+
 	//게임시작
 	hGameStart = CreateWindow(
 		L"button",
@@ -44,6 +52,9 @@ VOID CreateSystemClasses(HWND hWnd)
 		nullptr
 	);
 
+	//버튼 폰트 지정하기
+	SendMessage(hGameStart, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
+
 	//게임종료
 	hGameEnd = CreateWindow(
 		L"button",
@@ -58,6 +69,9 @@ VOID CreateSystemClasses(HWND hWnd)
 		g_hInst,
 		nullptr
 	);
+
+	//버튼 폰트 지정하기
+	SendMessage(hGameEnd, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
@@ -68,10 +82,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 		CreateSystemClasses(hWnd);
 		break;
 	case WM_DESTROY: // 프로그램 종료 시 도달하는 헤더
+		//폰트 설정 해제하기
+		DeleteObject(hFont);
 		PostQuitMessage(0);
 		break;
 	case WM_COMMAND:
-		//CommandProc(hWnd, uMessage, wParam, lParam);
+		CommandProc(hWnd, uMessage, wParam, lParam);
 		break;
 	case WM_PAINT:
 		CreateBackGround(hWnd);
