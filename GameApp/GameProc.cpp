@@ -64,8 +64,6 @@ VOID CreateSystemClasses(HWND hWnd)
 	//버튼 폰트 지정하기
 	SendMessage(hGameStart, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
 
-	std::cout << "btn1 : " << hGameStart << '\n';
-
 	//게임종료
 	hGameEnd = CreateWindow(
 		L"button",
