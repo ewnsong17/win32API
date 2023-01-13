@@ -1,1 +1,2 @@
 C:\Users\R0720H\Desktop\Etc\Git\GameApp\x64\Debug\GameApp.exe
+C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\x64\Debug\GameApp.exe
