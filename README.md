@@ -41,6 +41,8 @@ TextOut = 글씨 그리기
 
 CreateFontIndirect -> LOGFONT 구조체로 VS 내에 저장된 폰트 불러오기
 
+InvalidateRect -> 화면 다시 그리기
+
 # 아직 정리 못함
 
 CALLBACK = 콜백 함수

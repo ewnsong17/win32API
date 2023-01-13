@@ -1,11 +1,12 @@
 #pragma once
 #include <windows.h>
+#define IDC_BUTTON1 1003
+#define IDC_BUTTON2 1004
 
-static HWND hGameStart;
-static HWND hGameEnd;
-static HFONT hFont, oldFont;
-constexpr static LPCWSTR titleText = L"단어 맞추기 게임";
-constexpr static auto IDC_BUTTON1 = 1003;
-constexpr static auto IDC_BUTTON2 = 1004;
+extern HWND hGameStart;
+extern HWND hGameEnd;
+extern HFONT hFont, oldFont;
+extern LPCWSTR titleText;
+extern BOOL IsGameStarted;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam);

@@ -1,6 +1,9 @@
 #include "GameApp.h"
 #include "GameProc.h"
 
+LPCWSTR class_name = L"단어맞추기";
+HINSTANCE g_hInst;
+
 INT CreateWndClass(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszcmParam, int cmdShow)
 {
 	g_hInst = hInstance;
@@ -26,7 +29,7 @@ INT CreateWndClass(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszcmPar
 	HWND hWnd = CreateWindow(
 		class_name,
 		class_name,
-		WS_OVERLAPPEDWINDOW, // 다른 창과 겹칠 수 있는 옵션
+		WS_SYSMENU | WS_OVERLAPPED, // 다른 창과 겹칠 수 있는 옵션
 		CW_USEDEFAULT, // x
 		CW_USEDEFAULT, // y
 		640,// width,

@@ -2,6 +2,12 @@
 #include "GameApp.h"
 #include "CmdProc.h"
 
+HWND hGameStart = { 0 };
+HWND hGameEnd = { 0 };
+HFONT hFont = {}, oldFont = {};
+LPCWSTR titleText = L"단어 맞추기 게임";
+BOOL IsGameStarted = false;
+
 VOID CreateBackGround(HWND hWnd)
 {
 	PAINTSTRUCT ps;
@@ -22,8 +28,11 @@ VOID CreateBackGround(HWND hWnd)
 	oldFont = (HFONT)SelectObject(hdc, hFont);
 
 	//글씨 그리기
-	SetBkMode(hdc, TRANSPARENT);
-	TextOut(hdc, 245, 65, titleText, wcslen(titleText));
+	if (!IsGameStarted)
+	{
+		SetBkMode(hdc, TRANSPARENT);
+		TextOut(hdc, 245, 65, titleText, wcslen(titleText));
+	}
 
 	DeleteDC(hMemDC);
 	EndPaint(hWnd, &ps);
@@ -41,7 +50,7 @@ VOID CreateSystemClasses(HWND hWnd)
 	hGameStart = CreateWindow(
 		L"button",
 		L"게임시작",
-		WS_TABSTOP | WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		155,
 		550,
 		100,
@@ -55,11 +64,13 @@ VOID CreateSystemClasses(HWND hWnd)
 	//버튼 폰트 지정하기
 	SendMessage(hGameStart, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
 
+	std::cout << "btn1 : " << hGameStart << '\n';
+
 	//게임종료
 	hGameEnd = CreateWindow(
 		L"button",
 		L"게임종료",
-		WS_TABSTOP | WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		355,
 		550,
 		100,
