@@ -5,7 +5,7 @@
 
 extern LPCWSTR class_name;
 extern LPCWSTR word_list[];
-extern UINT word_count;
+extern HWND words_[];
 extern HINSTANCE g_hInst;
 extern HWND g_h_wnd;
 extern HHOOK _k_hook;

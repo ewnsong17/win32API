@@ -3,7 +3,7 @@
 
 LPCWSTR class_name = L"단어맞추기";
 LPCWSTR word_list[] = {L"사과", L"바나나", L"귤"};
-UINT word_count = 0;
+HWND words_[10];
 HINSTANCE g_hInst;
 HWND g_h_wnd;
 HHOOK _k_hook;
@@ -67,11 +67,42 @@ INT CreateWndClass(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszcmPar
 	return 0;
 }
 
+VOID UpdateWords(int size)
+{
+	for (int i = 0; i < size; i++)
+	{
+//		words_[i];
+	}
+}
+
+VOID CreateNewWord(HWND hWnd, int size)
+{
+	//단어 추가
+	words_[size] = CreateWindow(
+		L"static",
+		L"단어123123",
+		WS_CHILD | WS_VISIBLE,
+		155,
+		20,
+		100,
+		30,
+		hWnd,
+		(HMENU)-1,
+		g_hInst,
+		nullptr
+	);
+
+	//버튼 폰트 지정하기
+	SendMessage(hGameStart, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
+}
+
 VOID UpdateWordList()
 {
-	if (word_count < 3)
+	int size = (sizeof(words_) / sizeof(HWND));
+	if (size < 5)
 	{
-
+		UpdateWords(size);
+		CreateNewWord(g_h_wnd, size);
 	}
 }
 
