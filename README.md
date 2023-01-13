@@ -7,6 +7,7 @@ UINT = Unsigned Int
 WPARAM = word-parameter (과거 16비트 -> 현재 32비트)
 LPARAM = long-parameter (과거부터 32비트)
 LRESULT = long, HRESULT = int
+DWORD = unsigned long
 LPVOID = void*
 HINSTANCE = InstanceID, Handle + Instance (not ProcessID)
 LOWORD = int형 자료의 하위 2바이트 (HIWORD -> 상위 2바이트)

@@ -2,6 +2,8 @@
 #include "GameProc.h"
 
 LPCWSTR class_name = L"단어맞추기";
+LPCWSTR word_list[] = {L"사과", L"바나나", L"귤"};
+UINT word_count = 0;
 HINSTANCE g_hInst;
 HWND g_h_wnd;
 HHOOK _k_hook;
@@ -60,6 +62,27 @@ INT CreateWndClass(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszcmPar
 	else
 	{
 		MessageBox(nullptr, L"윈도우 창을 열지 못했습니다.", L"오류", MB_OK);
+	}
+
+	return 0;
+}
+
+VOID UpdateWordList()
+{
+	if (word_count < 3)
+	{
+
+	}
+}
+
+DWORD WINAPI WordThread(LPVOID lpParam)
+{
+	int timer = 60;
+	while (timer >= 0)
+	{
+		timer--;
+		UpdateWordList();
+		Sleep(1000);
 	}
 
 	return 0;

@@ -4,8 +4,12 @@
 #include <iostream>
 
 extern LPCWSTR class_name;
+extern LPCWSTR word_list[];
+extern UINT word_count;
 extern HINSTANCE g_hInst;
 extern HWND g_h_wnd;
 extern HHOOK _k_hook;
 
 INT CreateWndClass(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszcmParam, int cmdShow);
+
+DWORD WINAPI WordThread(LPVOID lpParam);
