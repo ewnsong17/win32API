@@ -13,8 +13,8 @@ bool bSelect = false;
 
 VOID CreateBackGround(HWND hWnd)
 {
-	PAINTSTRUCT ps;
-	BITMAP bit;
+	PAINTSTRUCT ps; // 그리기 기본 구조체
+	BITMAP bit; // 비트맵 이미지 구조체
 
 
 	HDC hdc = BeginPaint(hWnd, &ps); // 그리기 위한 DC 발급
@@ -22,10 +22,10 @@ VOID CreateBackGround(HWND hWnd)
 	HBITMAP MyBitMap = (HBITMAP)LoadImage(NULL, L"background.jpg", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION); //이미지 파일 로딩
 
 	GetObject(MyBitMap, sizeof(bit), &bit); // 로딩한 파일 읽어와 bit에 저장
-	HBITMAP OldBitMap = (HBITMAP)SelectObject(MemDC, MyBitMap); // 기존 배경화면 로딩
+	HBITMAP OldBitMap = (HBITMAP)SelectObject(MemDC, MyBitMap); // 기존 배경화면 MyBitMap으로 변경
 	BitBlt(hdc, 0, 0, 640, 640, MemDC, 0, 0, SRCCOPY); // 배경화면 교체
-	SelectObject(MemDC, OldBitMap); // 기존 배경화면 로딩 메모리 해제
-	DeleteObject(MyBitMap); // 새 배경 매모리 로딩 해제
+	SelectObject(MemDC, OldBitMap); // 배경 삭제를 위해 데이터 값 변경
+	DeleteObject(MyBitMap); //배경 메모리 로딩 삭제
 
 
 	DeleteDC(MemDC); // 메모리 로딩 DC 해제
