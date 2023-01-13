@@ -3,10 +3,13 @@
 
 LPCWSTR class_name = L"단어맞추기";
 HINSTANCE g_hInst;
+HWND g_h_wnd;
+HHOOK _k_hook;
 
 INT CreateWndClass(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszcmParam, int cmdShow)
 {
 	g_hInst = hInstance;
+	_k_hook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardProc, nullptr, 0);
 
 	//윈도우 프로세스 등록
 	WNDCLASSEX wnd_class;
@@ -26,7 +29,7 @@ INT CreateWndClass(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszcmPar
 	RegisterClassEx(&wnd_class);
 
 	//윈도우 창 생성
-	HWND hWnd = CreateWindow(
+	g_h_wnd = CreateWindow(
 		class_name,
 		class_name,
 		WS_SYSMENU | WS_OVERLAPPED, // 다른 창과 겹칠 수 있는 옵션
@@ -40,10 +43,10 @@ INT CreateWndClass(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszcmPar
 		nullptr
 	);
 
-	if (hWnd)
+	if (g_h_wnd)
 	{
-		ShowWindow(hWnd, SW_SHOWDEFAULT);
-		UpdateWindow(hWnd);
+		ShowWindow(g_h_wnd, SW_SHOWDEFAULT);
+		UpdateWindow(g_h_wnd);
 		MSG msg;
 
 		while (GetMessage(&msg, nullptr, 0, 0))
