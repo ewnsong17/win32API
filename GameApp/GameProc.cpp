@@ -1,3 +1,4 @@
+#define _CRT_RAND_S
 #include "GameApp.h"
 #include "GameProc.h"
 
@@ -218,7 +219,7 @@ LRESULT CALLBACK GameProc::WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPAR
 DWORD WINAPI GameProc::GameMainThread(LPVOID lpParam)
 {
 	int init_time = 180;
-	int add_index = 0;
+	unsigned int add_index = 0;
 	while (!AppData.bGameEnd && init_time >= 0)
 	{
 		init_time--;
@@ -238,16 +239,23 @@ Word::Word(int x, int y, LPCWSTR word, int score)
 	this->score = score;
 }
 
-VOID GameProc::UpdateWords(int& index)
+VOID GameProc::UpdateWords(unsigned int& index)
 {
 	int size = AppData.words.size();
 	if (size < 20 && (index % 3) == 1)
 	{
-		index = rand() % 5;
+		rand_s(&index);
 
-		Word word_ = AppData.word_list[rand() % AppData.word_list.size()];
+		index %= 5;
 
-		Word* word = new Word(35 + (rand() % 531), 20, word_.word, word_.score);
+		unsigned int num;
+		rand_s(&num);
+
+		Word word_ = AppData.word_list[num % AppData.word_list.size()];
+
+		unsigned int x;
+		rand_s(&x);
+		Word* word = new Word(35 + (x % 521), 20, word_.word, word_.score);
 		AppData.words.push_back(word);
 	}
 

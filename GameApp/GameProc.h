@@ -4,6 +4,7 @@
 #include <vector>
 #include <imm.h>
 #include <string>
+#include <time.h>
 
 constexpr int IDC_BTN_START = 1003;
 constexpr int IDC_BTN_END = 1004;
@@ -81,6 +82,6 @@ public:
 	static VOID CreateBackGround(HDC& hdc, HDC& hMemDC, HDC& hBackMemDC);
 	static VOID CreateText(HDC& hdc);
 	static DWORD WINAPI GameMainThread(LPVOID lpParam);
-	static VOID UpdateWords(int& index);
+	static VOID UpdateWords(unsigned int& index);
 	static VOID EnterTextProc(HWND hWnd);
 };
