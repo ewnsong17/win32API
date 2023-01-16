@@ -29,6 +29,9 @@ VOID GameProc::PaintTextImage(HWND hWnd)
 	//배경 투명 설정
 	SetBkMode(hdc, TRANSPARENT);
 
+	//글자 색 설정
+	SetTextColor(hdc, RGB(0, 0, 255));
+
 	CreateBackGround(hdc, hMemDC, hBackMemDC);
 
 	CreateText(hdc);
@@ -108,6 +111,9 @@ VOID GameProc::CreateGameModeWindows(HWND hWnd)
 	//폰트 일괄 지정
 	AppData.SetFont(AppData.hGameTextBox);
 	AppData.SetFont(AppData.hGameEnter);
+
+	//오토 포커스
+	SetFocus(AppData.hGameTextBox);
 }
 
 VOID GameProc::CreateInitialWindows(HWND hWnd)
@@ -195,6 +201,13 @@ LRESULT CALLBACK GameProc::WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPAR
 			break;
 		case WM_ERASEBKGND:
 			break;
+		case WM_CHAR:
+			if (wParam == 1)
+			{
+				SendMessage(hWnd, EM_SETSEL, 0, -1);
+				return 1;
+			}
+			break;
 		default:
 			return DefWindowProc(hWnd, uMessage, wParam, lParam);
 	}
@@ -211,27 +224,32 @@ DWORD WINAPI GameProc::GameMainThread(LPVOID lpParam)
 		init_time--;
 		add_index++;
 		UpdateWords(add_index);
-		Sleep(500);
+		Sleep(1000);
 	}
 
 	return 0;
 }
 
-Word::Word(int x, int y, LPCWSTR word)
+Word::Word(int x, int y, LPCWSTR word, int score)
 {
 	this->x = x;
 	this->y = y;
 	this->word = word;
+	this->score = score;
 }
 
 VOID GameProc::UpdateWords(int& index)
 {
-	SendMessage(GameApp.h_wnd, WM_COMMAND, (WPARAM)IDC_UPDATE_WORD, MAKELPARAM(TRUE, 0));
-
 	int size = AppData.words.size();
 	if (size < 20 && (index % 3) == 1)
 	{
 		index = rand() % 5;
-		SendMessage(GameApp.h_wnd, WM_COMMAND, (WPARAM)IDC_ADD_WORD, MAKELPARAM(TRUE, 0));
+
+		Word word_ = AppData.word_list[rand() % AppData.word_list.size()];
+
+		Word* word = new Word(35 + (rand() % 531), 20, word_.word, word_.score);
+		AppData.words.push_back(word);
 	}
+
+	SendMessage(GameApp.h_wnd, WM_COMMAND, (WPARAM)IDC_UPDATE_WORD, MAKELPARAM(TRUE, 0));
 }

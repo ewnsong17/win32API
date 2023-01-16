@@ -64,14 +64,6 @@ VOID GameProc::CmdProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 		}
-
-		case IDC_ADD_WORD:
-		{
-			Word* word = new Word(35 + (rand() % 531), 20, AppData.word_list[rand() % AppData.word_list.size()]);
-			AppData.words.push_back(word);
-			InvalidateRect(hWnd, nullptr, FALSE);
-			break;
-		}
 	}
 }
 
@@ -82,15 +74,31 @@ VOID GameProc::EnterTextProc(HWND hWnd)
 
 	GetWindowText(AppData.hGameTextBox, text, 1024);
 
+	int add_score = 0;
 	for (auto iter = AppData.words.begin(); iter != AppData.words.end(); iter++)
 	{
 		if (wcscmp(text, (*iter)->word) == 0)
 		{
+			add_score = (*iter)->score;
+			AppData.score += add_score;
+
 			free(*iter);
 			AppData.words.erase(iter);
-			AppData.score++;
 			break;
 		}
+	}
+
+
+	//전체 삭제
+	if (add_score > 5)
+	{
+		for (auto iter = AppData.words.begin(); iter != AppData.words.end(); iter++)
+		{
+			AppData.score += (*iter)->score;
+			free(*iter);
+		}
+
+		AppData.words.clear();
 	}
 
 	InvalidateRect(hWnd, nullptr, TRUE);

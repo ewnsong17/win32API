@@ -10,15 +10,14 @@ constexpr int IDC_BTN_END = 1004;
 constexpr int IDC_TEXT_WORD = 1005;
 constexpr int IDC_BTN_ENTER = 1006;
 constexpr int IDC_UPDATE_WORD = 1007;
-constexpr int IDC_ADD_WORD = 1008;
 
 class Word
 {
 public:
-	int x, y;
+	int x, y, score;
 	LPCWSTR word;
 
-	Word(int x, int y, LPCWSTR word);
+	Word(int x, int y, LPCWSTR word, int score);
 };
 
 class GameData
@@ -32,10 +31,38 @@ public:
 	std::vector<Word*> words;
 	INT score = 0;
 
-	std::vector<LPCWSTR> word_list{
-		L"사과", L"언어", L"자바", L"쿼리", L"문자열", L"스크립트", L"데이터", L"인덱스", 
-		L"배열", L"스트링", L"벡터", L"구조체", L"딸기", L"산부인과", L"모니터", L"책", 
-		L"물병", L"가방", L"전화기", L"마우스", L"인터넷", L"머리", L"안경", L"댓글" };
+	std::vector<Word> word_list
+	{
+		Word(0, 20, L"사과", 1),
+		Word(0, 20, L"가방", 1),
+		Word(0, 20, L"신사임당", 2),
+		Word(0, 20, L"컴퓨터", 1),
+		Word(0, 20, L"한글과컴퓨터", 4),
+		Word(0, 20, L"피라미드", 2),
+		Word(0, 20, L"물감", 1),
+		Word(0, 20, L"의자", 1),
+		Word(0, 20, L"모니터", 1),
+		Word(0, 20, L"사다리꼴", 2),
+		Word(0, 20, L"마름모", 1),
+		Word(0, 20, L"다이아몬드", 3),
+		Word(0, 20, L"아이스크림", 3),
+		Word(0, 20, L"스크래쳐", 2),
+		Word(0, 20, L"애니데스크", 3),
+		Word(0, 20, L"파워포인트", 3),
+		Word(0, 20, L"김밥", 1),
+		Word(0, 20, L"생크림", 1),
+		Word(0, 20, L"강좌", 3),
+		Word(0, 20, L"유니티", 1),
+		Word(0, 20, L"서커스단", 2),
+		Word(0, 20, L"광대", 1),
+		Word(0, 20, L"갈비뼈", 1),
+		Word(0, 20, L"소포모어", 2),
+		Word(0, 20, L"상대적박탈감", 4),
+		Word(0, 20, L"햄버거", 1),
+		Word(0, 20, L"인천상륙작전", 4),
+		Word(0, 20, L"선풍기", 1),
+		Word(0, 20, L"무구정광대다라니경", 7),
+	};
 
 	GameData();
 	VOID SetFont(HWND hWnd);
