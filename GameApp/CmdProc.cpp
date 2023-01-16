@@ -1,52 +1,23 @@
-#include "CmdProc.h"
 #include "GameProc.h"
-#include "GameApp.h"
 
-HANDLE hThread;
-
-VOID EnterTextProc(HWND hWnd)
-{
-	TCHAR buff[255];
-	LPWSTR text = (LPWSTR)buff;
-
-	GetWindowText(hGameTextBox, text, 1024);
-
-	for (auto iter = words_.begin(); iter != words_.end(); iter++)
-	{
-		if (wcscmp(text, (*iter)->word) == 0)
-		{
-			free(*iter);
-			words_.erase(iter);
-			break;
-		}
-	}
-
-	InvalidateRect(hWnd, nullptr, TRUE);
-
-	SetDlgItemText(hWnd, IDC_TEXT_WORD, L"");
-}
-
-VOID CommandProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
+VOID GameProc::CmdProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 {
 	switch (LOWORD(wParam))
 	{
 		case IDC_BTN_START:
 		{
-			//난이도를 골라주세요~~는 나중에하고 일단 게임부터?
+			DestroyWindow(AppData.hGameStart);
+			DestroyWindow(AppData.hGameEnd);
 
-			bGameStarted = TRUE;
-
-			ShowWindow(hGameStart, SW_HIDE);
-			ShowWindow(hGameEnd, SW_HIDE);
-
-			ShowWindow(hGameTextBox, SW_SHOW);
-			ShowWindow(hGameEnter, SW_SHOW);
+			AppData.bGameStart = true;
 
 			InvalidateRect(hWnd, nullptr, TRUE);
 
+			GameProc::CreateGameModeWindows(hWnd);
+
 			DWORD threadId = 0;
 			DWORD threadParam = 0;
-			hThread = CreateThread(nullptr, 0, WordThread, &threadParam, 0, &threadId);
+			CreateThread(nullptr, 0, GameMainThread, &threadParam, 0, &threadId);
 			break;
 		}
 		case IDC_BTN_END:
@@ -59,11 +30,9 @@ VOID CommandProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 		}
 		case IDC_TEXT_WORD:
 		{
-			switch (HIWORD(wParam))
+			if (HIWORD(wParam) == EN_SETFOCUS)
 			{
-				case EN_SETFOCUS:
-					SetDlgItemText(hWnd, IDC_TEXT_WORD, L"");
-					break;
+				SetDlgItemText(hWnd, IDC_TEXT_WORD, L"");
 			}
 			break;
 		}
@@ -72,27 +41,15 @@ VOID CommandProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 			EnterTextProc(hWnd);
 			break;
 		}
-		case IDC_MAKE_WORD:
-		{
-
-			HDC hdc = GetDC(g_h_wnd);
-
-			//단어 추가
-			Word* word = new Word(35 + (rand() % 531), 20, false, word_list[rand() % word_list.size()]);
-			words_.push_back(word);
-			InvalidateRect(hWnd, nullptr, FALSE);
-
-			break;
-		}
 		case IDC_UPDATE_WORD:
 		{
-			for (auto iter = words_.begin(); iter != words_.end(); iter++)
+			for (auto iter = AppData.words.begin(); iter != AppData.words.end(); iter++)
 			{
 				(*iter)->y += 15;
 
 				if ((*iter)->y > 540)
 				{
-					bEndGame = true;
+					AppData.bGameEnd = TRUE;
 					if (IDOK == MessageBox(hWnd, L"게임이 종료되었습니다.", L"알림", MB_OK))
 					{
 						SendMessage(hWnd, WM_DESTROY, wParam, lParam);
@@ -101,11 +58,40 @@ VOID CommandProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 				}
 			}
 
-			if (!bEndGame)
+			if (!AppData.bGameEnd)
 			{
 				InvalidateRect(hWnd, nullptr, TRUE);
 			}
 			break;
 		}
+
+		case IDC_ADD_WORD:
+		{
+			Word* word = new Word(35 + (rand() % 531), 20, AppData.word_list[rand() % AppData.word_list.size()]);
+			AppData.words.push_back(word);
+			InvalidateRect(hWnd, nullptr, FALSE);
+			break;
+		}
 	}
+}
+
+VOID GameProc::EnterTextProc(HWND hWnd)
+{
+	TCHAR buff[255];
+	LPWSTR text = (LPWSTR)buff;
+
+	GetWindowText(AppData.hGameTextBox, text, 1024);
+
+	for (auto iter = AppData.words.begin(); iter != AppData.words.end(); iter++)
+	{
+		if (wcscmp(text, (*iter)->word) == 0)
+		{
+			free(*iter);
+			AppData.words.erase(iter);
+			break;
+		}
+	}
+
+	InvalidateRect(hWnd, nullptr, TRUE);
+	SetDlgItemText(hWnd, IDC_TEXT_WORD, L"");
 }

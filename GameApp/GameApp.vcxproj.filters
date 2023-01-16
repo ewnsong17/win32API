@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="GameApp.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -29,13 +26,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GameProc.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="GameApp.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="CmdProc.h">
+    <ClInclude Include="GameProc.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,98 +1,93 @@
 #include "GameApp.h"
 #include "GameProc.h"
 
-LPCWSTR class_name = L"단어맞추기";
-HINSTANCE g_hInst;
-HWND g_h_wnd;
-HHOOK _k_hook;
-BOOL bEndGame = FALSE;
+GameAppWindow GameApp;
 
-INT CreateWndClass(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszcmParam, int cmdShow)
+GameAppWindow::GameAppWindow()
 {
-	g_hInst = hInstance;
-	_k_hook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardProc, nullptr, 0);
+	ZeroMemory(&this->h_inst, sizeof(this->h_inst));
+	ZeroMemory(&this->k_hook, sizeof(this->k_hook));
+	ZeroMemory(&this->wnd_class, sizeof(this->wnd_class));
+	ZeroMemory(&this->h_wnd, sizeof(this->h_wnd));
+	ZeroMemory(&this->call_msg, sizeof(this->call_msg));
 
-	//윈도우 프로세스 등록
-	WNDCLASSEX wnd_class;
-	wnd_class.cbSize = sizeof(WNDCLASSEXW);
-	wnd_class.cbClsExtra = 0;
-	wnd_class.cbWndExtra = 0;
-	wnd_class.hbrBackground = HBRUSH(0x10); // =int, RGB 값 전달하여 색깔 처리
-	wnd_class.hCursor = LoadCursorW(hInstance, IDC_ARROW); // 마우스 커서 기본 값
-	wnd_class.hIcon = LoadIconW(hInstance, IDI_APPLICATION); // 아이콘 기본 값
-	wnd_class.hIconSm = LoadIconW(hInstance, IDI_APPLICATION);
-	wnd_class.hInstance = hInstance;
-	wnd_class.lpfnWndProc = WndProc;
-	wnd_class.lpszClassName = class_name;
-	wnd_class.lpszMenuName = NULL;
-	wnd_class.style = CS_HREDRAW | CS_VREDRAW; // 클라이언트 창 크기 변경시 다시 그리는 옵션
+	k_hook = SetWindowsHookEx(WH_KEYBOARD_LL, GameAppWindow::KeyboardProc, nullptr, 0);
+}
 
-	RegisterClassEx(&wnd_class);
+VOID GameAppWindow::RegisterWndClass(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszcmParam, int cmdShow)
+{
+	this->wnd_class.cbSize = sizeof(WNDCLASSEX);
+	this->wnd_class.cbClsExtra = 0;
+	this->wnd_class.cbWndExtra = 0;
+	this->wnd_class.hbrBackground = HBRUSH(0x10);
+	this->wnd_class.hCursor = LoadCursor(hInstance, IDC_ARROW);
+	this->wnd_class.hIcon = LoadIcon(hInstance, IDI_APPLICATION);
+	this->wnd_class.hIconSm = LoadIcon(hInstance, IDI_APPLICATION);
+	this->wnd_class.hInstance = hInstance;
+	this->wnd_class.lpfnWndProc = GameProc::WndProc;
+	this->wnd_class.lpszClassName = this->class_name;
+	this->wnd_class.lpszMenuName = nullptr;
+	this->wnd_class.style = CS_HREDRAW | CS_VREDRAW;
 
-	//윈도우 창 생성
-	g_h_wnd = CreateWindow(
-		class_name,
-		class_name,
-		WS_SYSMENU | WS_OVERLAPPED, // 다른 창과 겹칠 수 있는 옵션
-		CW_USEDEFAULT, // x
-		CW_USEDEFAULT, // y
-		640,// width,
-		640,// height,
-		nullptr,//HWND(0),
-		nullptr,//HMENU(0),
-		hInstance,
+	RegisterClassEx(&this->wnd_class);
+}
+
+VOID GameAppWindow::CreateWndWindow()
+{
+	this->h_wnd = CreateWindow(
+		this->class_name,
+		this->class_name,
+		WS_SYSMENU | WS_OVERLAPPED,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		this->width,
+		this->height,
+		nullptr,
+		nullptr,
+		this->h_inst,
 		nullptr
 	);
+}
 
-	if (g_h_wnd)
+INT GameAppWindow::ShowWndWindow()
+{
+	if (this->h_wnd)
 	{
-		ShowWindow(g_h_wnd, SW_SHOWDEFAULT);
-		UpdateWindow(g_h_wnd);
-		MSG msg;
+		ShowWindow(this->h_wnd, SW_SHOWDEFAULT);
+		UpdateWindow(this->h_wnd);
 
-		while (GetMessage(&msg, nullptr, 0, 0))
+		while (GetMessage(&call_msg, nullptr, 0, 0))
 		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			TranslateMessage(&call_msg);
+			DispatchMessage(&call_msg);
 		}
 
-		return (int)msg.wParam;
+		return (int)call_msg.wParam;
 	}
 	else
 	{
-		MessageBox(nullptr, L"윈도우 창을 열지 못했습니다.", L"오류", MB_OK);
+		MessageBox(nullptr, L"게임을 실행하지 못했습니다.", L"오류", MB_OK);
 	}
-
 	return 0;
 }
 
-VOID CreateNewWord(HWND hWnd, int size)
+LRESULT CALLBACK GameAppWindow::KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
-	SendMessage(hWnd, WM_COMMAND, (WPARAM)IDC_MAKE_WORD, MAKELPARAM(TRUE, 0));
+	PKBDLLHOOKSTRUCT key = (PKBDLLHOOKSTRUCT)lParam;
+
+	if (wParam == WM_KEYDOWN && nCode == HC_ACTION && key->vkCode == 13)
+	{
+		GameProc::EnterTextProc(GameApp.h_wnd);
+	}
+	return CallNextHookEx(nullptr, nCode, wParam, lParam);
 }
 
-VOID UpdateWordList(int &index)
+INT APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszcmParam, int cmdShow)
 {
-	int size = words_.size();
-	SendMessage(g_h_wnd, WM_COMMAND, (WPARAM)IDC_UPDATE_WORD, MAKELPARAM(TRUE, 0));
-	if (size < 20 && (index % 3) == 1)
-	{
-		index = rand() % 5;
-		SendMessage(g_h_wnd, WM_COMMAND, (WPARAM)IDC_MAKE_WORD, MAKELPARAM(TRUE, 0));
-	}
-}
+	srand((unsigned int)time(NULL));
 
-DWORD WINAPI WordThread(LPVOID lpParam)
-{
-	int timer = 180;
-	int index = 0;
-	while (!bEndGame && timer >= 0)
-	{
-		timer--;
-		index++;
-		UpdateWordList(index);
-		Sleep(1000);
-	}
+	GameApp.RegisterWndClass(hInstance, hPrevInstance, lpszcmParam, cmdShow);
+	GameApp.CreateWndWindow();
 
-	return 0;
+	return GameApp.ShowWndWindow();
 }

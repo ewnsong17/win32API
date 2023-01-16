@@ -1,74 +1,116 @@
-#include "GameProc.h"
 #include "GameApp.h"
-#include "CmdProc.h"
+#include "GameProc.h"
 
-HWND hGameStart = {};
-HWND hGameEnd = {};
-HWND hGameTextBox = {};
-HWND hGameEnter = {};
-HFONT hFont = {}, oldFont = {};
-LPCWSTR titleText = L"단어 맞추기 게임";
-BOOL bGameStarted = FALSE;
+GameData AppData;
 
-std::vector<LPCWSTR> word_list{ L"apple", L"banana", L"orange", L"melon", L"grapes"};
-std::vector<Word*> words_;
+GameData::GameData()
+{
+	ZeroMemory(&this->hGameStart, sizeof(this->hGameStart));
+	ZeroMemory(&this->hGameEnd, sizeof(this->hGameEnd));
+	ZeroMemory(&this->hGameTextBox, sizeof(this->hGameTextBox));
+	ZeroMemory(&this->hGameEnter, sizeof(this->hGameEnter));
+	ZeroMemory(&this->hFont, sizeof(this->hFont));
+	ZeroMemory(&this->hOldFont, sizeof(this->hOldFont));
+}
 
-VOID CreateBackGround(HWND hWnd)
+VOID GameData::SetFont(HWND hWnd)
+{
+	SendMessage(hWnd, WM_SETFONT, (WPARAM)this->hFont, MAKELPARAM(TRUE, 0));
+}
+
+VOID GameProc::PaintTextImage(HWND hWnd)
 {
 	PAINTSTRUCT ps;
-	BITMAP bit;
 
 	HDC hdc = BeginPaint(hWnd, &ps);
 	HDC hMemDC = CreateCompatibleDC(hdc);
 
+	CreateBackGround(hdc, hMemDC);
+	CreateText(hdc);
+
+	//메모리 해제
+	DeleteDC(hMemDC);
+
+	//페인트 해제
+	EndPaint(hWnd, &ps);
+}
+
+VOID GameProc::CreateBackGround(HDC &hdc, HDC &hMemDC)
+{
+	BITMAP bit;
+
 	//배경화면 그리기
-	HBITMAP hBit = (HBITMAP)LoadImage(NULL, L"background.jpg", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+	HBITMAP hBit = (HBITMAP)LoadImage(nullptr, L"background.jpg", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+	
+	//hMemDC에 로딩한 이미지 값 넣기
 	GetObject(hBit, sizeof(bit), &bit);
 	HBITMAP hOld = (HBITMAP)SelectObject(hMemDC, hBit);
-	BitBlt(hdc, 0, 0, 640, 640, hMemDC, 0, 0, SRCCOPY);
+
+	//넣은 값 실제로 카피해서 꺼내 쓰기
+	BitBlt(hdc, 0, 0, GameApp.width, GameApp.height, hMemDC, 0, 0, SRCCOPY);
+
+	//메모리 값 다시 이전 값으로 변경
 	SelectObject(hMemDC, hOld);
+
+	//변경 후 더이상 쓸모 없어진 데이터 메모리 해제
 	DeleteObject(hBit);
 
 	//배경 투명 설정
 	SetBkMode(hdc, TRANSPARENT);
 
-	//텍스트 폰트 지정하기
-	oldFont = (HFONT)SelectObject(hdc, hFont);
-
-	//글씨 그리기
-	if (bGameStarted)
-	{
-		for (auto iter = words_.begin(); iter != words_.end(); iter++)
-		{
-			LPCWSTR word = (*iter)->word;
-			TextOut(
-				hdc, 
-				(*iter)->x,
-				(*iter)->y,
-				word,
-				wcslen(word)
-			);
-		}
-	}
-	else
-	{
-		TextOut(hdc, 245, 65, titleText, wcslen(titleText));
-	}
-
-	DeleteDC(hMemDC);
-	EndPaint(hWnd, &ps);
+	//텍스트 폰트 변경하기
+	AppData.hOldFont = (HFONT)SelectObject(hdc, AppData.hFont);
 }
 
-VOID CreateSystemClasses(HWND hWnd)
+VOID GameProc::CreateGameModeWindows(HWND hWnd)
 {
-	//폰트 로딩하기
+	//게임 시 입력창
+	AppData.hGameTextBox = CreateWindowEx(
+		WS_EX_CLIENTEDGE,
+		L"edit",
+		L"입력하세요.",
+		WS_CHILD | WS_VISIBLE | SW_HIDE | ES_CENTER,
+		180,
+		550,
+		200,
+		30,
+		hWnd,
+		(HMENU)IDC_TEXT_WORD,
+		GameApp.h_inst,
+		nullptr
+	);
+
+	//게임 메시지 전송창
+	AppData.hGameEnter = CreateWindow(
+		L"button",
+		L"전송",
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		400,
+		550,
+		50,
+		30,
+		hWnd,
+		(HMENU)IDC_BTN_ENTER,
+		GameApp.h_inst,
+		nullptr
+	);
+
+	//폰트 일괄 지정
+	AppData.SetFont(AppData.hGameTextBox);
+	AppData.SetFont(AppData.hGameEnter);
+}
+
+VOID GameProc::CreateInitialWindows(HWND hWnd)
+{
+	//HY엽서M 폰트 지정
 	LOGFONT lf;
 	ZeroMemory(&lf, sizeof(lf));
 	wcscpy_s(lf.lfFaceName, L"HY엽서M");
-	hFont = CreateFontIndirect(&lf);
 
-	//게임시작
-	hGameStart = CreateWindow(
+	AppData.hFont = CreateFontIndirect(&lf);
+
+	//게임시작 버튼
+	AppData.hGameStart = CreateWindow(
 		L"button",
 		L"게임시작",
 		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
@@ -78,15 +120,12 @@ VOID CreateSystemClasses(HWND hWnd)
 		30,
 		hWnd,
 		(HMENU)IDC_BTN_START,
-		g_hInst,
+		GameApp.h_inst,
 		nullptr
 	);
 
-	//버튼 폰트 지정하기
-	SendMessage(hGameStart, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
-
-	//게임종료
-	hGameEnd = CreateWindow(
+	//게임종료 버튼
+	AppData.hGameEnd = CreateWindow(
 		L"button",
 		L"게임종료",
 		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
@@ -96,70 +135,47 @@ VOID CreateSystemClasses(HWND hWnd)
 		30,
 		hWnd,
 		(HMENU)IDC_BTN_END,
-		g_hInst,
+		GameApp.h_inst,
 		nullptr
 	);
 
-	//버튼 폰트 지정하기
-	SendMessage(hGameEnd, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
-
-	//게임 시 입력창
-	hGameTextBox = CreateWindowEx(
-		WS_EX_CLIENTEDGE,
-		L"Edit",
-		L"입력하세요.",
-		WS_CHILD | SW_HIDE | ES_CENTER,
-		180,
-		550,
-		200,
-		30,
-		hWnd,
-		(HMENU)IDC_TEXT_WORD,
-		g_hInst,
-		nullptr
-	);
-
-	//텍스트 폰트 지정하기
-	SendMessage(hGameTextBox, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
-
-	//게임 메시지 전송창
-	hGameEnter = CreateWindow(
-		L"button",
-		L"전송",
-		WS_CHILD | BS_PUSHBUTTON,
-		400,
-		550,
-		50,
-		30,
-		hWnd,
-		(HMENU)IDC_BTN_ENTER,
-		g_hInst,
-		nullptr
-	);
-
-	//버튼 폰트 지정하기
-	SendMessage(hGameEnter, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
+	//폰트 일괄 지정
+	AppData.SetFont(AppData.hGameStart);
+	AppData.SetFont(AppData.hGameEnd);
 }
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
+VOID GameProc::CreateText(HDC& hdc)
+{
+	if (AppData.bGameStart)
+	{
+		for (auto iter = AppData.words.begin(); iter != AppData.words.end(); iter++)
+		{
+			LPCWSTR word = (*iter)->word;
+			TextOut(hdc, (*iter)->x, (*iter)->y, word, wcslen(word));
+		}
+	}
+	else
+	{
+		TextOut(hdc, 260, 65, AppData.titleText, wcslen(AppData.titleText));
+	}
+}
+
+LRESULT CALLBACK GameProc::WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMessage)
 	{
-		case WM_CREATE: // 프로그램 실행 시 도달하는 헤더
-			CreateSystemClasses(hWnd);
+		case WM_CREATE:
+			CreateInitialWindows(hWnd);
 			break;
-		case WM_DESTROY: // 프로그램 종료 시 도달하는 헤더
-			//폰트 설정 해제하기
-			DeleteObject(hFont);
-			//키보드 인식 해제하기
-			UnhookWindowsHookEx(_k_hook);
+		case WM_DESTROY:
+			UnhookWindowsHookEx(GameApp.k_hook);
 			PostQuitMessage(0);
 			break;
 		case WM_COMMAND:
-			CommandProc(hWnd, uMessage, wParam, lParam);
+			CmdProc(hWnd, uMessage, wParam, lParam);
 			break;
 		case WM_PAINT:
-			CreateBackGround(hWnd);
+			PaintTextImage(hWnd);
 			break;
 		case WM_ERASEBKGND:
 			break;
@@ -169,21 +185,37 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
-{
-	PKBDLLHOOKSTRUCT key = (PKBDLLHOOKSTRUCT)lParam;
 
-	if (wParam == WM_KEYDOWN && nCode == HC_ACTION && key->vkCode == 13 && bGameStarted)
+DWORD WINAPI GameProc::GameMainThread(LPVOID lpParam)
+{
+	int init_time = 180;
+	int add_index = 0;
+	while (!AppData.bGameEnd && init_time >= 0)
 	{
-		EnterTextProc(g_h_wnd);
+		init_time--;
+		add_index++;
+		UpdateWords(add_index);
+		Sleep(1000);
 	}
-	return CallNextHookEx(nullptr, nCode, wParam, lParam);
+
+	return 0;
 }
 
-Word::Word(int x, int y, bool bShow, LPCWSTR word)
+Word::Word(int x, int y, LPCWSTR word)
 {
 	this->x = x;
 	this->y = y;
-	this->bShow = bShow;
 	this->word = word;
+}
+
+VOID GameProc::UpdateWords(int& index)
+{
+	SendMessage(GameApp.h_wnd, WM_COMMAND, (WPARAM)IDC_UPDATE_WORD, MAKELPARAM(TRUE, 0));
+
+	int size = AppData.words.size();
+	if (size < 20 && (index % 3) == 1)
+	{
+		index = rand() % 5;
+		SendMessage(GameApp.h_wnd, WM_COMMAND, (WPARAM)IDC_ADD_WORD, MAKELPARAM(TRUE, 0));
+	}
 }

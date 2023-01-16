@@ -1,16 +1,23 @@
 #pragma once
-#include <windows.h>
-#include <tchar.h>
-#include <iostream>
-#include <stdlib.h>
+#include <Windows.h>
 #include <time.h>
 
-extern LPCWSTR class_name;
-extern HINSTANCE g_hInst;
-extern HWND g_h_wnd;
-extern HHOOK _k_hook;
-extern BOOL bEndGame;
+class GameAppWindow
+{
+public:
+	HINSTANCE h_inst;
+	HHOOK k_hook;
+	WNDCLASSEX wnd_class;
+	HWND h_wnd;
+	LPCWSTR class_name = L"단어게임";
+	INT width = 640, height = 640;
+	MSG call_msg;
 
-INT CreateWndClass(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszcmParam, int cmdShow);
+	GameAppWindow();
+	VOID RegisterWndClass(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszcmParam, int cmdShow);
+	VOID CreateWndWindow();
+	INT ShowWndWindow();
+	static LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
+};
 
-DWORD WINAPI WordThread(LPVOID lpParam);
+extern GameAppWindow GameApp;
