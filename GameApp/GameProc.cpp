@@ -8,7 +8,10 @@ HWND hGameTextBox = {};
 HWND hGameEnter = {};
 HFONT hFont = {}, oldFont = {};
 LPCWSTR titleText = L"단어 맞추기 게임";
-BOOL IsGameStarted = false;
+BOOL bGameStarted = FALSE;
+
+std::vector<LPCWSTR> word_list{ L"apple", L"banana", L"orange", L"melon", L"grapes"};
+std::vector<Word*> words_;
 
 VOID CreateBackGround(HWND hWnd)
 {
@@ -26,13 +29,29 @@ VOID CreateBackGround(HWND hWnd)
 	SelectObject(hMemDC, hOld);
 	DeleteObject(hBit);
 
+	//배경 투명 설정
+	SetBkMode(hdc, TRANSPARENT);
+
 	//텍스트 폰트 지정하기
 	oldFont = (HFONT)SelectObject(hdc, hFont);
 
 	//글씨 그리기
-	if (!IsGameStarted)
+	if (bGameStarted)
 	{
-		SetBkMode(hdc, TRANSPARENT);
+		for (auto iter = words_.begin(); iter != words_.end(); iter++)
+		{
+			LPCWSTR word = (*iter)->word;
+			TextOut(
+				hdc, 
+				(*iter)->x,
+				(*iter)->y,
+				word,
+				wcslen(word)
+			);
+		}
+	}
+	else
+	{
 		TextOut(hdc, 245, 65, titleText, wcslen(titleText));
 	}
 
@@ -58,7 +77,7 @@ VOID CreateSystemClasses(HWND hWnd)
 		100,
 		30,
 		hWnd,
-		(HMENU)IDC_BUTTON1,
+		(HMENU)IDC_BTN_START,
 		g_hInst,
 		nullptr
 	);
@@ -76,7 +95,7 @@ VOID CreateSystemClasses(HWND hWnd)
 		100,
 		30,
 		hWnd,
-		(HMENU)IDC_BUTTON2,
+		(HMENU)IDC_BTN_END,
 		g_hInst,
 		nullptr
 	);
@@ -95,7 +114,7 @@ VOID CreateSystemClasses(HWND hWnd)
 		200,
 		30,
 		hWnd,
-		(HMENU)IDC_TEXTBOX1,
+		(HMENU)IDC_TEXT_WORD,
 		g_hInst,
 		nullptr
 	);
@@ -113,7 +132,7 @@ VOID CreateSystemClasses(HWND hWnd)
 		50,
 		30,
 		hWnd,
-		(HMENU)IDC_BUTTON3,
+		(HMENU)IDC_BTN_ENTER,
 		g_hInst,
 		nullptr
 	);
@@ -142,6 +161,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 		case WM_PAINT:
 			CreateBackGround(hWnd);
 			break;
+		case WM_ERASEBKGND:
+			break;
 		default:
 			return DefWindowProc(hWnd, uMessage, wParam, lParam);
 	}
@@ -152,9 +173,17 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
 	PKBDLLHOOKSTRUCT key = (PKBDLLHOOKSTRUCT)lParam;
 
-	if (wParam == WM_KEYDOWN && nCode == HC_ACTION && key->vkCode == 13 && IsGameStarted)
+	if (wParam == WM_KEYDOWN && nCode == HC_ACTION && key->vkCode == 13 && bGameStarted)
 	{
-		SetDlgItemText(g_h_wnd, IDC_TEXTBOX1, L"");
+		EnterTextProc(g_h_wnd);
 	}
 	return CallNextHookEx(nullptr, nCode, wParam, lParam);
+}
+
+Word::Word(int x, int y, bool bShow, LPCWSTR word)
+{
+	this->x = x;
+	this->y = y;
+	this->bShow = bShow;
+	this->word = word;
 }

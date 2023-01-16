@@ -2,11 +2,10 @@
 #include "GameProc.h"
 
 LPCWSTR class_name = L"단어맞추기";
-LPCWSTR word_list[] = {L"사과", L"바나나", L"귤"};
-HWND words_[10];
 HINSTANCE g_hInst;
 HWND g_h_wnd;
 HHOOK _k_hook;
+BOOL bEndGame = FALSE;
 
 INT CreateWndClass(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszcmParam, int cmdShow)
 {
@@ -67,52 +66,31 @@ INT CreateWndClass(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszcmPar
 	return 0;
 }
 
-VOID UpdateWords(int size)
-{
-	for (int i = 0; i < size; i++)
-	{
-//		words_[i];
-	}
-}
-
 VOID CreateNewWord(HWND hWnd, int size)
 {
-	//단어 추가
-	words_[size] = CreateWindow(
-		L"static",
-		L"단어123123",
-		WS_CHILD | WS_VISIBLE,
-		155,
-		20,
-		100,
-		30,
-		hWnd,
-		(HMENU)-1,
-		g_hInst,
-		nullptr
-	);
-
-	//버튼 폰트 지정하기
-	SendMessage(hGameStart, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
+	SendMessage(hWnd, WM_COMMAND, (WPARAM)IDC_MAKE_WORD, MAKELPARAM(TRUE, 0));
 }
 
-VOID UpdateWordList()
+VOID UpdateWordList(int &index)
 {
-	int size = (sizeof(words_) / sizeof(HWND));
-	if (size < 5)
+	int size = words_.size();
+	SendMessage(g_h_wnd, WM_COMMAND, (WPARAM)IDC_UPDATE_WORD, MAKELPARAM(TRUE, 0));
+	if (size < 20 && (index % 3) == 1)
 	{
-		UpdateWords(size);
-		CreateNewWord(g_h_wnd, size);
+		index = rand() % 5;
+		SendMessage(g_h_wnd, WM_COMMAND, (WPARAM)IDC_MAKE_WORD, MAKELPARAM(TRUE, 0));
 	}
 }
 
 DWORD WINAPI WordThread(LPVOID lpParam)
 {
-	int timer = 60;
-	while (timer >= 0)
+	int timer = 180;
+	int index = 0;
+	while (!bEndGame && timer >= 0)
 	{
 		timer--;
-		UpdateWordList();
+		index++;
+		UpdateWordList(index);
 		Sleep(1000);
 	}
 
