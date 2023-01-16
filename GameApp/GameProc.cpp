@@ -25,7 +25,11 @@ VOID GameProc::PaintTextImage(HWND hWnd)
 	HDC hdc = BeginPaint(hWnd, &ps);
 	HDC hMemDC = CreateCompatibleDC(hdc);
 
+	//배경 투명 설정
+	SetBkMode(hdc, TRANSPARENT);
+
 	CreateBackGround(hdc, hMemDC);
+
 	CreateText(hdc);
 
 	//메모리 해제
@@ -54,9 +58,6 @@ VOID GameProc::CreateBackGround(HDC &hdc, HDC &hMemDC)
 
 	//변경 후 더이상 쓸모 없어진 데이터 메모리 해제
 	DeleteObject(hBit);
-
-	//배경 투명 설정
-	SetBkMode(hdc, TRANSPARENT);
 
 	//텍스트 폰트 변경하기
 	AppData.hOldFont = (HFONT)SelectObject(hdc, AppData.hFont);
@@ -148,6 +149,11 @@ VOID GameProc::CreateText(HDC& hdc)
 {
 	if (AppData.bGameStart)
 	{
+		std::wstring scoreText = L"스코어 : ";
+		scoreText += std::to_wstring(AppData.score);
+		scoreText += L"점";
+
+		TextOut(hdc, 10, 570, scoreText.c_str(), wcslen(scoreText.c_str()));
 		for (auto iter = AppData.words.begin(); iter != AppData.words.end(); iter++)
 		{
 			LPCWSTR word = (*iter)->word;
@@ -168,6 +174,7 @@ LRESULT CALLBACK GameProc::WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPAR
 			CreateInitialWindows(hWnd);
 			break;
 		case WM_DESTROY:
+			DeleteObject(AppData.hFont);
 			UnhookWindowsHookEx(GameApp.k_hook);
 			PostQuitMessage(0);
 			break;
@@ -195,7 +202,7 @@ DWORD WINAPI GameProc::GameMainThread(LPVOID lpParam)
 		init_time--;
 		add_index++;
 		UpdateWords(add_index);
-		Sleep(1000);
+		Sleep(500);
 	}
 
 	return 0;

@@ -88,10 +88,16 @@ VOID GameProc::EnterTextProc(HWND hWnd)
 		{
 			free(*iter);
 			AppData.words.erase(iter);
+			AppData.score++;
 			break;
 		}
 	}
 
 	InvalidateRect(hWnd, nullptr, TRUE);
+
+	HIMC hImc;
+	hImc = ImmGetContext(hWnd);
+	ImmNotifyIME(hImc, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
+	ImmReleaseContext(hWnd, hImc);
 	SetDlgItemText(hWnd, IDC_TEXT_WORD, L"");
 }

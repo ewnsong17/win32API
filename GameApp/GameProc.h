@@ -1,6 +1,9 @@
 #pragma once
+#pragma comment(lib, "imm32.lib")
 #include <Windows.h>
 #include <vector>
+#include <imm.h>
+#include <string>
 
 constexpr int IDC_BTN_START = 1003;
 constexpr int IDC_BTN_END = 1004;
@@ -27,8 +30,12 @@ public:
 	BOOL bGameStart = FALSE;
 	BOOL bGameEnd = FALSE;
 	std::vector<Word*> words;
+	INT score = 0;
 
-	std::vector<LPCWSTR> word_list{ L"Apple", L"Cream", L"Tiger", L"Elephant", L"Strawberry", L"Messanger", L"Owl", L"Text", L"Java", L"Static", L"Class", L"Fire", L"Along" };
+	std::vector<LPCWSTR> word_list{
+		L"사과", L"언어", L"자바", L"쿼리", L"문자열", L"스크립트", L"데이터", L"인덱스", 
+		L"배열", L"스트링", L"벡터", L"구조체", L"딸기", L"산부인과", L"모니터", L"책", 
+		L"물병", L"가방", L"전화기", L"마우스", L"인터넷", L"머리", L"안경", L"댓글" };
 
 	GameData();
 	VOID SetFont(HWND hWnd);
