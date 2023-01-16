@@ -24,37 +24,46 @@ VOID GameProc::PaintTextImage(HWND hWnd)
 
 	HDC hdc = BeginPaint(hWnd, &ps);
 	HDC hMemDC = CreateCompatibleDC(hdc);
+	HDC hBackMemDC = CreateCompatibleDC(hdc);
 
 	//배경 투명 설정
 	SetBkMode(hdc, TRANSPARENT);
 
-	CreateBackGround(hdc, hMemDC);
+	CreateBackGround(hdc, hMemDC, hBackMemDC);
 
 	CreateText(hdc);
 
 	//메모리 해제
 	DeleteDC(hMemDC);
+	DeleteDC(hBackMemDC);
 
 	//페인트 해제
 	EndPaint(hWnd, &ps);
 }
 
-VOID GameProc::CreateBackGround(HDC &hdc, HDC &hMemDC)
+VOID GameProc::CreateBackGround(HDC& hdc, HDC& hMemDC, HDC& hBackMemDC)
 {
 	BITMAP bit;
 
+	//더블 버퍼링에 준비
+	HBITMAP backBitMap = CreateCompatibleBitmap(hdc, GameApp.width, GameApp.height);
+	HBITMAP hOldBitMap = (HBITMAP)SelectObject(hBackMemDC, backBitMap);
+
 	//배경화면 그리기
 	HBITMAP hBit = (HBITMAP)LoadImage(nullptr, L"background.jpg", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
-	
+
 	//hMemDC에 로딩한 이미지 값 넣기
 	GetObject(hBit, sizeof(bit), &bit);
 	HBITMAP hOld = (HBITMAP)SelectObject(hMemDC, hBit);
 
-	//넣은 값 실제로 카피해서 꺼내 쓰기
-	BitBlt(hdc, 0, 0, GameApp.width, GameApp.height, hMemDC, 0, 0, SRCCOPY);
+	//더블 버퍼링에 넣은 값 꺼내와서 로딩하기
+	BitBlt(hBackMemDC, 0, 0, GameApp.width, GameApp.height, hMemDC, 0, 0, SRCCOPY);
+
+	//이후 실제 화면에 그래픽 처리하기
+	BitBlt(hdc, 0, 0, GameApp.width, GameApp.height, hBackMemDC, 0, 0, SRCCOPY);
 
 	//메모리 값 다시 이전 값으로 변경
-	SelectObject(hMemDC, hOld);
+	SelectObject(hBackMemDC, hOld);
 
 	//변경 후 더이상 쓸모 없어진 데이터 메모리 해제
 	DeleteObject(hBit);

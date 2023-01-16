@@ -51,7 +51,7 @@ public:
 	static VOID CreateInitialWindows(HWND hWnd);
 	static VOID CreateGameModeWindows(HWND hWnd);
 	static VOID PaintTextImage(HWND hWnd);
-	static VOID CreateBackGround(HDC& hdc, HDC& hMemDC);
+	static VOID CreateBackGround(HDC& hdc, HDC& hMemDC, HDC& hBackMemDC);
 	static VOID CreateText(HDC& hdc);
 	static DWORD WINAPI GameMainThread(LPVOID lpParam);
 	static VOID UpdateWords(int& index);
