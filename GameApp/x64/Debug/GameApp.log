@@ -1,2 +1,19 @@
-﻿  CmdProc.cpp
+﻿  GameProc.cpp
+C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\GameProc.cpp(82,1): warning C4312: '형식 캐스트': 'const int'에서 더 큰 'HMENU'(으)로의 변환입니다.
+C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\GameProc.cpp(97,1): warning C4312: '형식 캐스트': 'const int'에서 더 큰 'HMENU'(으)로의 변환입니다.
+C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\GameProc.cpp(119,1): warning C4312: '형식 캐스트': 'const int'에서 더 큰 'HMENU'(으)로의 변환입니다.
+C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\GameProc.cpp(134,1): warning C4312: '형식 캐스트': 'const int'에서 더 큰 'HMENU'(으)로의 변환입니다.
+C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\GameProc.cpp(154,23): warning C4312: '형식 캐스트': 'const int'에서 더 큰 'HMENU'(으)로의 변환입니다.
+C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\GameProc.cpp(172,1): warning C4312: '형식 캐스트': 'const int'에서 더 큰 'HMENU'(으)로의 변환입니다.
+C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\GameProc.cpp(204,1): warning C4312: '형식 캐스트': 'const int'에서 더 큰 'HMENU'(으)로의 변환입니다.
+C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\GameProc.cpp(219,1): warning C4312: '형식 캐스트': 'const int'에서 더 큰 'HMENU'(으)로의 변환입니다.
+C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\GameProc.cpp(234,68): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\GameProc.cpp(242,68): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\GameProc.cpp(251,67): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\GameProc.cpp(260,67): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\GameProc.cpp(280,68): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\GameProc.cpp(297,58): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\GameProc.cpp(314,69): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\GameProc.cpp(372,33): warning C4267: '초기화 중': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\GameProc.cpp(389,120): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   GameApp.vcxproj -> C:\Users\R0720H\Desktop\Etc\Git\GameApp\GameApp\x64\Debug\GameApp.exe

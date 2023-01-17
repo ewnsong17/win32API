@@ -351,15 +351,14 @@ LRESULT CALLBACK GameProc::WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPAR
 
 DWORD WINAPI GameProc::GameMainThread(LPVOID lpParam)
 {
-	int init_time = 180;
 	unsigned int add_index = 0;
-	while (!AppData.bGameEnd && init_time >= 0)
+	unsigned int next_index = 0;
+	while (!AppData.bGameEnd)
 	{
 		if (!AppData.bGameStop)
 		{
-			init_time--;
 			add_index++;
-			UpdateWords(add_index);
+			UpdateWords(add_index, next_index);
 		}
 
 		Sleep(1000);
@@ -368,24 +367,26 @@ DWORD WINAPI GameProc::GameMainThread(LPVOID lpParam)
 	return 0;
 }
 
-VOID GameProc::UpdateWords(unsigned int& index)
+VOID GameProc::UpdateWords(unsigned int& index, unsigned int& next_index)
 {
 	int size = AppData.words.size();
-	int level_cool = 8 - ((int)(AppData.level / 2));
-	if (size <= 0 || (size < 20 + AppData.level && index >= level_cool))
+	AppData.level = 11;
+	if (size < 20 + AppData.level && index >= next_index)
 	{
-		rand_s(&index);
+		index = 0;
 
-		index %= level_cool;
+		rand_s(&next_index);
+		next_index %= (AppData.level_cool_l[AppData.level - 1] - AppData.level_cool_f[AppData.level - 1] + 1); // 0 ~ 3
+		next_index += AppData.level_cool_f[AppData.level - 1]; // 3 ~ 6
 
-		unsigned int num;
-		rand_s(&num);
-
-		Word word_ = AppData.GetNextWord();
-		unsigned int x;
-		rand_s(&x);
-		Word* word = new Word(35 + (x % 515) - wcslen(word_.word), 5, word_.word, word_.score, word_.weight);
-		AppData.words.push_back(word);
+		for (int i = 0; i < AppData.level_count[AppData.level - 1]; i++)
+		{
+			Word word_ = AppData.GetNextWord();
+			unsigned int x;
+			rand_s(&x);
+			Word* word = new Word(35 + (x % 515) - wcslen(word_.word), (i == 0 ? 5 : 55), word_.word, word_.score, word_.weight);
+			AppData.words.push_back(word);
+		}
 	}
 
 	SendMessage(GameApp.h_wnd, WM_COMMAND, (WPARAM)IDC_UPDATE_WORD, MAKELPARAM(TRUE, 0));

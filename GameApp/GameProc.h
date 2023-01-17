@@ -28,7 +28,7 @@ public:
 	static VOID CreateGameResumeEndText(HDC& hdc);
 	static VOID CreateGameWordListText(HDC& hdc);
 	static DWORD WINAPI GameMainThread(LPVOID lpParam);
-	static VOID UpdateWords(unsigned int& index);
+	static VOID UpdateWords(unsigned int& index, unsigned int& next_index);
 	static VOID EnterTextProc(HWND hWnd);
 	static VOID EscapeProc(HWND hWnd);
 	static VOID UseBombSkill(HWND hWnd);

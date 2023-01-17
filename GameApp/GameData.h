@@ -23,7 +23,10 @@ public:
 	std::vector<Word*> words;
 	INT score = 0, level = 1, bomb = 3, life = 3;
 	
-	std::vector<INT> exp = { 20, 30, 45, 60, 90, 120, 150, 180, 300, 500, 0 };
+	std::vector<INT> exp = { 10, 25, 40, 60, 85, 110, 140, 175, 210, 250, 0 };
+	std::vector<INT> level_cool_f = { 3, 3, 3, 2, 2, 2, 2, 1, 2, 1, 0 };
+	std::vector<INT> level_cool_l = { 5, 4, 3, 4, 3, 2, 2, 3, 3, 2, 1 };
+	std::vector<INT> level_count = { 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2 };
 	RECT end_line = { 0, 540, 640, 545 };
 
 	std::vector<Word> word_list

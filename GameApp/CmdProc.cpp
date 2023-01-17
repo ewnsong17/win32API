@@ -8,6 +8,8 @@ VOID GameProc::CmdProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 	{
 		case IDC_BTN_START:
 		{
+			ShowWindow(AppData.hGameStart, SW_HIDE);
+			ShowWindow(AppData.hGameEnd, SW_HIDE);
 			DestroyWindow(AppData.hGameStart);
 			DestroyWindow(AppData.hGameEnd);
 
@@ -58,9 +60,12 @@ VOID GameProc::CmdProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 		{
 			std::vector<int> remove_index;
 			int index = -1;
+			bool bChange = FALSE;
+
 			for (auto iter = AppData.words.begin(); iter != AppData.words.end(); iter++)
 			{
 				index++;
+				bChange = TRUE;
 				(*iter)->y += 25;
 
 				if ((*iter)->y > 530)
@@ -74,6 +79,8 @@ VOID GameProc::CmdProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 					AppData.bGameEnd = TRUE;
 					AppData.bGameStart = FALSE;
 
+					ShowWindow(AppData.hGameTextBox, SW_HIDE);
+					ShowWindow(AppData.hGameEnter, SW_HIDE);
 					DestroyWindow(AppData.hGameTextBox);
 					DestroyWindow(AppData.hGameEnter);
 
@@ -91,7 +98,7 @@ VOID GameProc::CmdProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 				AppData.words.erase(it);
 			}
 
-			if (!AppData.bGameEnd)
+			if (bChange && !AppData.bGameEnd)
 			{
 				InvalidateRect(hWnd, nullptr, TRUE);
 			}
@@ -148,6 +155,8 @@ VOID GameProc::EnterTextProc(HWND hWnd)
 
 VOID GameProc::EscapeProc(HWND hWnd)
 {
+	ShowWindow(AppData.hGameTextBox, SW_HIDE);
+	ShowWindow(AppData.hGameEnter, SW_HIDE);
 	DestroyWindow(AppData.hGameTextBox);
 	DestroyWindow(AppData.hGameEnter);
 
