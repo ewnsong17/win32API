@@ -22,6 +22,7 @@ VOID GameProc::CmdProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 			AppData.bGameStart = TRUE;
 
 			InvalidateRect(hWnd, nullptr, TRUE);
+			UpdateWindow(hWnd);
 
 			GameProc::CreateGameModeWindows(hWnd);
 
@@ -85,6 +86,7 @@ VOID GameProc::CmdProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 					DestroyWindow(AppData.hGameEnter);
 
 					InvalidateRect(hWnd, nullptr, TRUE);
+					UpdateWindow(hWnd);
 					GameProc::RemoveAllWords(FALSE);
 					GameProc::CreateGameEndWindows(hWnd);
 					return;
@@ -96,11 +98,15 @@ VOID GameProc::CmdProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 				auto it = AppData.words.begin() + remove_index[i];
 				free(*it);
 				AppData.words.erase(it);
+
+				InvalidateRect(hWnd, new RECT{ 630, 0, 640, 640 }, TRUE);
+				UpdateWindow(hWnd);
 			}
 
 			if (bChange && !AppData.bGameEnd)
 			{
-				InvalidateRect(hWnd, nullptr, TRUE);
+				InvalidateRect(hWnd, new RECT{ 0, 0, 640, 630 }, TRUE);
+				UpdateWindow(hWnd);
 			}
 			break;
 		}
@@ -144,7 +150,8 @@ VOID GameProc::EnterTextProc(HWND hWnd)
 		GameProc::RemoveAllWords(TRUE);
 	}
 
-	InvalidateRect(hWnd, nullptr, TRUE);
+	InvalidateRect(hWnd, new RECT{ 0, 0, 640, 630 }, TRUE);
+	UpdateWindow(hWnd);
 
 	HIMC hImc;
 	hImc = ImmGetContext(hWnd);
@@ -164,6 +171,7 @@ VOID GameProc::EscapeProc(HWND hWnd)
 
 	GameProc::CreateGameStopWindows(hWnd);
 	InvalidateRect(hWnd, nullptr, TRUE);
+	UpdateWindow(hWnd);
 }
 
 VOID GameProc::UseBombSkill(HWND hWnd)
@@ -175,6 +183,7 @@ VOID GameProc::UseBombSkill(HWND hWnd)
 			AppData.bomb--;
 			GameProc::RemoveAllWords(FALSE);
 			InvalidateRect(hWnd, nullptr, TRUE);
+			UpdateWindow(hWnd);
 		}
 	}
 }
