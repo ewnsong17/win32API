@@ -370,7 +370,7 @@ DWORD WINAPI GameProc::GameMainThread(LPVOID lpParam)
 VOID GameProc::UpdateWords(unsigned int& index, unsigned int& next_index)
 {
 	int size = AppData.words.size();
-	AppData.level = 11;
+
 	if (size < 20 + AppData.level && index >= next_index)
 	{
 		index = 0;
