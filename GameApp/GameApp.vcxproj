@@ -21,10 +21,12 @@
   <ItemGroup>
     <ClCompile Include="CmdProc.cpp" />
     <ClCompile Include="GameApp.cpp" />
+    <ClCompile Include="GameData.cpp" />
     <ClCompile Include="GameProc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameApp.h" />
+    <ClInclude Include="GameData.h" />
     <ClInclude Include="GameProc.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

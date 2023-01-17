@@ -1,51 +1,7 @@
 #define _CRT_RAND_S
 #include "GameApp.h"
 #include "GameProc.h"
-
-
-/////////////////// GameData ////////////////
-GameData AppData;
-
-GameData::GameData()
-{
-	ZeroMemory(&this->hGameStart, sizeof(this->hGameStart));
-	ZeroMemory(&this->hGameEnd, sizeof(this->hGameEnd));
-	ZeroMemory(&this->hGameTextBox, sizeof(this->hGameTextBox));
-	ZeroMemory(&this->hGameEnter, sizeof(this->hGameEnter));
-	ZeroMemory(&this->hFont, sizeof(this->hFont));
-	ZeroMemory(&this->hOldFont, sizeof(this->hOldFont));
-}
-
-VOID GameData::SetFont(HWND hWnd)
-{
-	SendMessage(hWnd, WM_SETFONT, (WPARAM)this->hFont, MAKELPARAM(TRUE, 0));
-}
-
-Word GameData::GetNextWord()
-{
-	int max_weight = 0;
-
-	for (auto iter = this->word_list.begin(); iter != this->word_list.end(); iter++)
-	{
-		max_weight += iter->weight;
-	}
-
-	unsigned int next_value;
-	rand_s(&next_value);
-
-	int new_weight = next_value %= max_weight;
-
-	for (auto iter = this->word_list.begin(); iter != this->word_list.end(); iter++)
-	{
-		new_weight -= iter->weight;
-		if (new_weight <= 0)
-		{
-			return *iter;
-		}
-	}
-}
-
-/////////////////// GameProc ////////////////
+#include "GameData.h"
 
 VOID GameProc::PaintTextImage(HWND hWnd)
 {
@@ -63,9 +19,10 @@ VOID GameProc::PaintTextImage(HWND hWnd)
 	CreateText(hdc);
 
 	//게임 종료 선 생성
-	if (AppData.bGameStart)
+	if (!AppData.bGameStop && AppData.bGameStart)
 	{
-		Rectangle(hdc, AppData.end_line.left, AppData.end_line.top, AppData.end_line.right, AppData.end_line.bottom);
+		HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 0));
+		FillRect(hdc, &AppData.end_line, hBrush);
 	}
 
 	//메모리 해제
@@ -144,6 +101,43 @@ VOID GameProc::CreateGameEndWindows(HWND hWnd)
 	AppData.SetFont(AppData.hGameEnd);
 }
 
+VOID GameProc::CreateGameStopWindows(HWND hWnd)
+{
+	//게임 이어하기 버튼
+	AppData.hGameStart = CreateWindow(
+		L"button",
+		L"이어하기",
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		155,
+		550,
+		100,
+		30,
+		hWnd,
+		(HMENU)IDC_BTN_START,
+		GameApp.h_inst,
+		nullptr
+	);
+
+	//게임종료 버튼
+	AppData.hGameEnd = CreateWindow(
+		L"button",
+		L"게임종료",
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		355,
+		550,
+		100,
+		30,
+		hWnd,
+		(HMENU)IDC_BTN_END,
+		GameApp.h_inst,
+		nullptr
+	);
+
+	//폰트 일괄 지정
+	AppData.SetFont(AppData.hGameStart);
+	AppData.SetFont(AppData.hGameEnd);
+}
+
 VOID GameProc::CreateGameModeWindows(HWND hWnd)
 {
 	//게임 시 입력창
@@ -153,7 +147,7 @@ VOID GameProc::CreateGameModeWindows(HWND hWnd)
 		L"입력하세요.",
 		WS_CHILD | WS_VISIBLE | SW_HIDE | ES_CENTER,
 		180,
-		550,
+		555,
 		200,
 		30,
 		hWnd,
@@ -168,7 +162,7 @@ VOID GameProc::CreateGameModeWindows(HWND hWnd)
 		L"전송",
 		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		400,
-		550,
+		555,
 		50,
 		30,
 		hWnd,
@@ -187,10 +181,10 @@ VOID GameProc::CreateGameModeWindows(HWND hWnd)
 
 VOID GameProc::CreateInitialWindows(HWND hWnd)
 {
-	//HY엽서M 폰트 지정
+	//HY견고딕 폰트 지정
 	LOGFONT lf;
 	ZeroMemory(&lf, sizeof(lf));
-	wcscpy_s(lf.lfFaceName, L"HY엽서M");
+	wcscpy_s(lf.lfFaceName, L"HY견고딕");
 
 	AppData.hFont = CreateFontIndirect(&lf);
 
@@ -229,45 +223,91 @@ VOID GameProc::CreateInitialWindows(HWND hWnd)
 	AppData.SetFont(AppData.hGameEnd);
 }
 
+VOID GameProc::CreateGameToolTipText(HDC& hdc)
+{
+	//단계
+	SetTextColor(hdc, RGB(125, 0, 125));
+	std::wstring levelText = L"";
+	levelText += std::to_wstring(AppData.level);
+	levelText += L"단계";
+
+	TextOut(hdc, 12, 550, levelText.c_str(), wcslen(levelText.c_str()));
+
+	//스코어
+	SetTextColor(hdc, RGB(125, 0, 255));
+	std::wstring scoreText = L"스코어 : ";
+	scoreText += std::to_wstring(AppData.score);
+	scoreText += L"점";
+
+	TextOut(hdc, 10, 570, scoreText.c_str(), wcslen(scoreText.c_str()));
+
+	//폭탄
+	SetTextColor(hdc, RGB(100, 0, 0));
+	std::wstring bombText = L"폭탄 (F1)";
+	for (int i = 0; i < AppData.bomb; i++)
+	{
+		bombText += L"  ●";
+	}
+	TextOut(hdc, 490, 550, bombText.c_str(), wcslen(bombText.c_str()));
+
+	//라이프
+	SetTextColor(hdc, RGB(0, 255, 100));
+	std::wstring lifeText = L"라이프   ";
+	for (int i = 0; i < AppData.life; i++)
+	{
+		lifeText += L"  ●";
+	}
+	TextOut(hdc, 491, 570, lifeText.c_str(), wcslen(lifeText.c_str()));
+}
+
+VOID GameProc::CreateGameResumeEndText(HDC& hdc)
+{
+	std::wstring scoreText;
+	if (AppData.bGameStop)
+	{
+		scoreText = L"일시정지 상태입니다.  ";
+	}
+	else
+	{
+		scoreText = L"게임이 종료되었습니다.  ";
+	}
+
+	scoreText += std::to_wstring(AppData.level);
+	scoreText += L"단계. 총 스코어: ";
+	scoreText += std::to_wstring(AppData.score);
+	scoreText += L"점";
+
+	TextOut(hdc, 175, 65, scoreText.c_str(), wcslen(scoreText.c_str()));
+}
+
+VOID GameProc::CreateGameWordListText(HDC& hdc)
+{
+	for (auto iter = AppData.words.begin(); iter != AppData.words.end(); iter++)
+	{
+		LPCWSTR word = (*iter)->word;
+		if ((*iter)->weight <= 3)
+		{
+			//글자 색 설정
+			SetTextColor(hdc, RGB(0, 0, 255));
+		}
+		else
+		{
+			SetTextColor(hdc, RGB(0, 0, 0));
+		}
+		TextOut(hdc, (*iter)->x, (*iter)->y, word, wcslen(word));
+	}
+}
+
 VOID GameProc::CreateText(HDC& hdc)
 {
-	if (AppData.bGameStart)
+	if (AppData.bGameStop || AppData.bGameEnd)
 	{
-		SetTextColor(hdc, RGB(125, 0, 125));
-		std::wstring levelText = L"";
-		levelText += std::to_wstring(AppData.level);
-		levelText += L"단계";
-
-		TextOut(hdc, 12, 550, levelText.c_str(), wcslen(levelText.c_str()));
-
-		SetTextColor(hdc, RGB(125, 0, 255));
-		std::wstring scoreText = L"스코어 : ";
-		scoreText += std::to_wstring(AppData.score);
-		scoreText += L"점";
-
-		TextOut(hdc, 10, 570, scoreText.c_str(), wcslen(scoreText.c_str()));
-		for (auto iter = AppData.words.begin(); iter != AppData.words.end(); iter++)
-		{
-			LPCWSTR word = (*iter)->word;
-			if ((*iter)->weight <= 3)
-			{
-				//글자 색 설정
-				SetTextColor(hdc, RGB(0, 0, 255));
-			}
-			else
-			{
-				SetTextColor(hdc, RGB(0, 0, 0));
-			}
-			TextOut(hdc, (*iter)->x, (*iter)->y, word, wcslen(word));
-		}
+		GameProc::CreateGameResumeEndText(hdc);
 	}
-	else if (AppData.bGameEnd)
+	else if (AppData.bGameStart)
 	{
-		std::wstring scoreText = L"게임이 종료되었습니다.  스코어 : ";
-		scoreText += std::to_wstring(AppData.score);
-		scoreText += L"점";
-
-		TextOut(hdc, 175, 65, scoreText.c_str(), wcslen(scoreText.c_str()));
+		GameProc::CreateGameToolTipText(hdc);
+		GameProc::CreateGameWordListText(hdc);
 	}
 	else
 	{
@@ -315,33 +355,28 @@ DWORD WINAPI GameProc::GameMainThread(LPVOID lpParam)
 	unsigned int add_index = 0;
 	while (!AppData.bGameEnd && init_time >= 0)
 	{
-		init_time--;
-		add_index++;
-		UpdateWords(add_index);
+		if (!AppData.bGameStop)
+		{
+			init_time--;
+			add_index++;
+			UpdateWords(add_index);
+		}
+
 		Sleep(1000);
 	}
 
 	return 0;
 }
 
-Word::Word(int x, int y, LPCWSTR word, int score, int weight)
-{
-	this->x = x;
-	this->y = y;
-	this->word = word;
-	this->score = score;
-	this->weight = weight;
-}
-
 VOID GameProc::UpdateWords(unsigned int& index)
 {
 	int size = AppData.words.size();
 	int level_cool = 8 - ((int)(AppData.level / 2));
-	if (size <= 0 || (size < 20 + AppData.level && (index % level_cool) == 1))
+	if (size <= 0 || (size < 20 + AppData.level && index >= level_cool))
 	{
 		rand_s(&index);
 
-		index %= 5;
+		index %= level_cool;
 
 		unsigned int num;
 		rand_s(&num);

@@ -1,4 +1,6 @@
+#define NOMINMAX
 #include "GameProc.h"
+#include "GameData.h"
 
 VOID GameProc::CmdProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 {
@@ -21,9 +23,14 @@ VOID GameProc::CmdProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 
 			GameProc::CreateGameModeWindows(hWnd);
 
-			DWORD threadId = 0;
-			DWORD threadParam = 0;
-			CreateThread(nullptr, 0, GameMainThread, &threadParam, 0, &threadId);
+			if (!AppData.bGameStop)
+			{
+				DWORD threadId = 0;
+				DWORD threadParam = 0;
+				CreateThread(nullptr, 0, GameMainThread, &threadParam, 0, &threadId);
+			}
+			
+			AppData.bGameStop = FALSE;
 			break;
 		}
 		case IDC_BTN_END:
@@ -49,11 +56,20 @@ VOID GameProc::CmdProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 		}
 		case IDC_UPDATE_WORD:
 		{
+			std::vector<int> remove_index;
+			int index = -1;
 			for (auto iter = AppData.words.begin(); iter != AppData.words.end(); iter++)
 			{
+				index++;
 				(*iter)->y += 25;
 
-				if ((*iter)->y > 540)
+				if ((*iter)->y > 530)
+				{
+					AppData.life--;
+					remove_index.push_back(index);
+				}
+				
+				if (AppData.life <= 0)
 				{
 					AppData.bGameEnd = TRUE;
 					AppData.bGameStart = FALSE;
@@ -62,10 +78,17 @@ VOID GameProc::CmdProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 					DestroyWindow(AppData.hGameEnter);
 
 					InvalidateRect(hWnd, nullptr, TRUE);
-
+					GameProc::RemoveAllWords(FALSE);
 					GameProc::CreateGameEndWindows(hWnd);
-					break;
+					return;
 				}
+			}
+
+			for (int i = 0; i < remove_index.size(); i++)
+			{
+				auto it = AppData.words.begin() + remove_index[i];
+				free(*it);
+				AppData.words.erase(it);
 			}
 
 			if (!AppData.bGameEnd)
@@ -94,6 +117,11 @@ VOID GameProc::EnterTextProc(HWND hWnd)
 			if (AppData.level <= 10 && AppData.score >= AppData.exp[AppData.level - (INT)1])
 			{
 				AppData.level++;
+				AppData.life = std::min(3, AppData.life + 1);
+				if (AppData.level == 6 || AppData.level == 11)
+				{
+					AppData.bomb = std::min(3, AppData.bomb + 1);
+				}
 			}
 
 			free(*iter);
@@ -106,13 +134,7 @@ VOID GameProc::EnterTextProc(HWND hWnd)
 	//전체 삭제
 	if (add_score > 5)
 	{
-		for (auto iter = AppData.words.begin(); iter != AppData.words.end(); iter++)
-		{
-			AppData.score += (*iter)->score;
-			free(*iter);
-		}
-
-		AppData.words.clear();
+		GameProc::RemoveAllWords(TRUE);
 	}
 
 	InvalidateRect(hWnd, nullptr, TRUE);
@@ -122,4 +144,43 @@ VOID GameProc::EnterTextProc(HWND hWnd)
 	ImmNotifyIME(hImc, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
 	ImmReleaseContext(hWnd, hImc);
 	SetDlgItemText(hWnd, IDC_TEXT_WORD, L"");
+}
+
+VOID GameProc::EscapeProc(HWND hWnd)
+{
+	DestroyWindow(AppData.hGameTextBox);
+	DestroyWindow(AppData.hGameEnter);
+
+	AppData.bGameStop = TRUE;
+
+	GameProc::CreateGameStopWindows(hWnd);
+	InvalidateRect(hWnd, nullptr, TRUE);
+}
+
+VOID GameProc::UseBombSkill(HWND hWnd)
+{
+	if (AppData.bomb > 0)
+	{
+		if (AppData.words.size() > 0)
+		{
+			AppData.bomb--;
+			GameProc::RemoveAllWords(FALSE);
+			InvalidateRect(hWnd, nullptr, TRUE);
+		}
+	}
+}
+
+VOID GameProc::RemoveAllWords(BOOL bAddScore)
+{
+	for (auto iter = AppData.words.begin(); iter != AppData.words.end(); iter++)
+	{
+		if (bAddScore)
+		{
+			AppData.score += (*iter)->score;
+		}
+
+		free(*iter);
+	}
+
+	AppData.words.clear();
 }

@@ -1,7 +1,9 @@
 #include "GameApp.h"
 #include "GameProc.h"
 
+#ifndef NDEBUG
 #pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console") 
+#endif
 
 GameAppWindow GameApp;
 
@@ -77,9 +79,23 @@ LRESULT CALLBACK GameAppWindow::KeyboardProc(int nCode, WPARAM wParam, LPARAM lP
 {
 	PKBDLLHOOKSTRUCT key = (PKBDLLHOOKSTRUCT)lParam;
 
-	if (wParam == WM_KEYDOWN && nCode == HC_ACTION && key->vkCode == 13)
+	if (wParam == WM_KEYDOWN && nCode == HC_ACTION)
 	{
-		GameProc::EnterTextProc(GameApp.h_wnd);
+		switch (key->vkCode)
+		{
+			case VK_RETURN:
+				GameProc::EnterTextProc(GameApp.h_wnd);
+				break;
+			case VK_ESCAPE:
+				GameProc::EscapeProc(GameApp.h_wnd);
+				break;
+			case VK_F1:
+				GameProc::UseBombSkill(GameApp.h_wnd);
+				break;
+			default:
+//				std::cout << "input key : " << key->vkCode << '\n';
+				break;
+		}
 	}
 	return CallNextHookEx(nullptr, nCode, wParam, lParam);
 }
