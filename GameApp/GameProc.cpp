@@ -376,10 +376,10 @@ VOID GameProc::UpdateWords(unsigned int& index, unsigned int& next_index)
 		index = 0;
 
 		rand_s(&next_index);
-		next_index %= (AppData.level_cool_l[AppData.level - 1] - AppData.level_cool_f[AppData.level - 1] + 1); // 0 ~ 3
-		next_index += AppData.level_cool_f[AppData.level - 1]; // 3 ~ 6
+		next_index %= (AppData.level_cool_l[(long long) AppData.level - 1] - AppData.level_cool_f[(long long) AppData.level - 1] + 1); // 0 ~ 3
+		next_index += AppData.level_cool_f[(long long) AppData.level - 1]; // 3 ~ 6
 
-		for (int i = 0; i < AppData.level_count[AppData.level - 1]; i++)
+		for (int i = 0; i < AppData.level_count[(long long) AppData.level - 1]; i++)
 		{
 			Word word_ = AppData.GetNextWord();
 			unsigned int x;

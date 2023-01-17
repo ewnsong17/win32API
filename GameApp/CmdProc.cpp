@@ -127,7 +127,7 @@ VOID GameProc::EnterTextProc(HWND hWnd)
 		{
 			add_score = (*iter)->score;
 			AppData.score += add_score;
-			if (AppData.level <= 10 && AppData.score >= AppData.exp[AppData.level - (INT)1])
+			if (AppData.level <= 10 && AppData.score >= AppData.exp[(long long) AppData.level - 1])
 			{
 				AppData.level++;
 				AppData.life = std::min(3, AppData.life + 1);
