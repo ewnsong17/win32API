@@ -1,6 +1,8 @@
 #include "GameApp.h"
 #include "GameProc.h"
 
+#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console") 
+
 GameAppWindow GameApp;
 
 GameAppWindow::GameAppWindow()

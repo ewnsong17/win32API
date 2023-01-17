@@ -8,7 +8,7 @@ public:
 	HHOOK k_hook;
 	WNDCLASSEX wnd_class;
 	HWND h_wnd;
-	LPCWSTR class_name = L"단어게임";
+	LPCWSTR class_name = L"미니게임";
 	INT width = 640, height = 640;
 	MSG call_msg;
 

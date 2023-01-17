@@ -9,7 +9,13 @@ VOID GameProc::CmdProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 			DestroyWindow(AppData.hGameStart);
 			DestroyWindow(AppData.hGameEnd);
 
-			AppData.bGameStart = true;
+			if (AppData.bGameEnd)
+			{
+				AppData.words.clear();
+				AppData.bGameEnd = FALSE;
+			}
+
+			AppData.bGameStart = TRUE;
 
 			InvalidateRect(hWnd, nullptr, TRUE);
 
@@ -45,15 +51,19 @@ VOID GameProc::CmdProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 		{
 			for (auto iter = AppData.words.begin(); iter != AppData.words.end(); iter++)
 			{
-				(*iter)->y += 15;
+				(*iter)->y += 25;
 
 				if ((*iter)->y > 540)
 				{
 					AppData.bGameEnd = TRUE;
-					if (IDOK == MessageBox(hWnd, L"게임이 종료되었습니다.", L"알림", MB_OK))
-					{
-						SendMessage(hWnd, WM_DESTROY, wParam, lParam);
-					}
+					AppData.bGameStart = FALSE;
+
+					DestroyWindow(AppData.hGameTextBox);
+					DestroyWindow(AppData.hGameEnter);
+
+					InvalidateRect(hWnd, nullptr, TRUE);
+
+					GameProc::CreateGameEndWindows(hWnd);
 					break;
 				}
 			}
@@ -81,6 +91,10 @@ VOID GameProc::EnterTextProc(HWND hWnd)
 		{
 			add_score = (*iter)->score;
 			AppData.score += add_score;
+			if (AppData.level <= 10 && AppData.score >= AppData.exp[AppData.level - (INT)1])
+			{
+				AppData.level++;
+			}
 
 			free(*iter);
 			AppData.words.erase(iter);

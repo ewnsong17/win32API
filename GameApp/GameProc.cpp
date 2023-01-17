@@ -2,6 +2,8 @@
 #include "GameApp.h"
 #include "GameProc.h"
 
+
+/////////////////// GameData ////////////////
 GameData AppData;
 
 GameData::GameData()
@@ -19,6 +21,32 @@ VOID GameData::SetFont(HWND hWnd)
 	SendMessage(hWnd, WM_SETFONT, (WPARAM)this->hFont, MAKELPARAM(TRUE, 0));
 }
 
+Word GameData::GetNextWord()
+{
+	int max_weight = 0;
+
+	for (auto iter = this->word_list.begin(); iter != this->word_list.end(); iter++)
+	{
+		max_weight += iter->weight;
+	}
+
+	unsigned int next_value;
+	rand_s(&next_value);
+
+	int new_weight = next_value %= max_weight;
+
+	for (auto iter = this->word_list.begin(); iter != this->word_list.end(); iter++)
+	{
+		new_weight -= iter->weight;
+		if (new_weight <= 0)
+		{
+			return *iter;
+		}
+	}
+}
+
+/////////////////// GameProc ////////////////
+
 VOID GameProc::PaintTextImage(HWND hWnd)
 {
 	PAINTSTRUCT ps;
@@ -30,12 +58,15 @@ VOID GameProc::PaintTextImage(HWND hWnd)
 	//배경 투명 설정
 	SetBkMode(hdc, TRANSPARENT);
 
-	//글자 색 설정
-	SetTextColor(hdc, RGB(0, 0, 255));
-
 	CreateBackGround(hdc, hMemDC, hBackMemDC);
 
 	CreateText(hdc);
+
+	//게임 종료 선 생성
+	if (AppData.bGameStart)
+	{
+		Rectangle(hdc, AppData.end_line.left, AppData.end_line.top, AppData.end_line.right, AppData.end_line.bottom);
+	}
 
 	//메모리 해제
 	DeleteDC(hMemDC);
@@ -74,6 +105,43 @@ VOID GameProc::CreateBackGround(HDC& hdc, HDC& hMemDC, HDC& hBackMemDC)
 
 	//텍스트 폰트 변경하기
 	AppData.hOldFont = (HFONT)SelectObject(hdc, AppData.hFont);
+}
+
+VOID GameProc::CreateGameEndWindows(HWND hWnd)
+{
+	//게임 다시하기 버튼
+	AppData.hGameStart = CreateWindow(
+		L"button",
+		L"다시하기",
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		155,
+		550,
+		100,
+		30,
+		hWnd,
+		(HMENU)IDC_BTN_START,
+		GameApp.h_inst,
+		nullptr
+	);
+
+	//게임종료 버튼
+	AppData.hGameEnd = CreateWindow(
+		L"button",
+		L"게임종료",
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		355,
+		550,
+		100,
+		30,
+		hWnd,
+		(HMENU)IDC_BTN_END,
+		GameApp.h_inst,
+		nullptr
+	);
+
+	//폰트 일괄 지정
+	AppData.SetFont(AppData.hGameStart);
+	AppData.SetFont(AppData.hGameEnd);
 }
 
 VOID GameProc::CreateGameModeWindows(HWND hWnd)
@@ -165,6 +233,14 @@ VOID GameProc::CreateText(HDC& hdc)
 {
 	if (AppData.bGameStart)
 	{
+		SetTextColor(hdc, RGB(125, 0, 125));
+		std::wstring levelText = L"";
+		levelText += std::to_wstring(AppData.level);
+		levelText += L"단계";
+
+		TextOut(hdc, 12, 550, levelText.c_str(), wcslen(levelText.c_str()));
+
+		SetTextColor(hdc, RGB(125, 0, 255));
 		std::wstring scoreText = L"스코어 : ";
 		scoreText += std::to_wstring(AppData.score);
 		scoreText += L"점";
@@ -173,8 +249,25 @@ VOID GameProc::CreateText(HDC& hdc)
 		for (auto iter = AppData.words.begin(); iter != AppData.words.end(); iter++)
 		{
 			LPCWSTR word = (*iter)->word;
+			if ((*iter)->weight <= 3)
+			{
+				//글자 색 설정
+				SetTextColor(hdc, RGB(0, 0, 255));
+			}
+			else
+			{
+				SetTextColor(hdc, RGB(0, 0, 0));
+			}
 			TextOut(hdc, (*iter)->x, (*iter)->y, word, wcslen(word));
 		}
+	}
+	else if (AppData.bGameEnd)
+	{
+		std::wstring scoreText = L"게임이 종료되었습니다.  스코어 : ";
+		scoreText += std::to_wstring(AppData.score);
+		scoreText += L"점";
+
+		TextOut(hdc, 175, 65, scoreText.c_str(), wcslen(scoreText.c_str()));
 	}
 	else
 	{
@@ -231,18 +324,20 @@ DWORD WINAPI GameProc::GameMainThread(LPVOID lpParam)
 	return 0;
 }
 
-Word::Word(int x, int y, LPCWSTR word, int score)
+Word::Word(int x, int y, LPCWSTR word, int score, int weight)
 {
 	this->x = x;
 	this->y = y;
 	this->word = word;
 	this->score = score;
+	this->weight = weight;
 }
 
 VOID GameProc::UpdateWords(unsigned int& index)
 {
 	int size = AppData.words.size();
-	if (size < 20 && (index % 3) == 1)
+	int level_cool = 8 - ((int)(AppData.level / 2));
+	if (size <= 0 || (size < 20 + AppData.level && (index % level_cool) == 1))
 	{
 		rand_s(&index);
 
@@ -251,11 +346,10 @@ VOID GameProc::UpdateWords(unsigned int& index)
 		unsigned int num;
 		rand_s(&num);
 
-		Word word_ = AppData.word_list[num % AppData.word_list.size()];
-
+		Word word_ = AppData.GetNextWord();
 		unsigned int x;
 		rand_s(&x);
-		Word* word = new Word(35 + (x % 521), 20, word_.word, word_.score);
+		Word* word = new Word(35 + (x % 515) - wcslen(word_.word), 5, word_.word, word_.score, word_.weight);
 		AppData.words.push_back(word);
 	}
 
