@@ -92,7 +92,7 @@ LRESULT CALLBACK GameAppWindow::KeyboardProc(int nCode, WPARAM wParam, LPARAM lP
 				GameProc::UseBombSkill(GameApp.h_wnd);
 				break;
 			default:
-//				std::cout << "input key : " << key->vkCode << '\n';
+				std::cout << "input key : " << key->vkCode << '\n';
 				break;
 		}
 	}

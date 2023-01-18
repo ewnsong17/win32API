@@ -285,7 +285,11 @@ VOID GameProc::CreateGameWordListText(HDC& hdc)
 	for (auto iter = AppData.words.begin(); iter != AppData.words.end(); iter++)
 	{
 		LPCWSTR word = (*iter)->word;
-		if ((*iter)->weight <= 3)
+		if ((*iter)->weight <= 1)
+		{
+			//글자 색 설정
+			SetTextColor(hdc, RGB(255, 0, 0));
+		} else if ((*iter)->weight <= 3)
 		{
 			//글자 색 설정
 			SetTextColor(hdc, RGB(0, 0, 255));
@@ -334,6 +338,11 @@ LRESULT CALLBACK GameProc::WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPAR
 			PaintTextImage(hWnd);
 			break;
 		case WM_ERASEBKGND:
+		case WM_RBUTTONDOWN:
+		case WM_CONTEXTMENU:
+		case WM_COPY:
+		case WM_CUT:
+		case WM_PASTE:
 			break;
 		case WM_CHAR:
 			if (wParam == 1)

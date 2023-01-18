@@ -46,6 +46,7 @@ VOID GameProc::CmdProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 		}
 		case IDC_TEXT_WORD:
 		{
+			std::cout << "message : " << HIWORD(wParam) << '\n';
 			if (HIWORD(wParam) == EN_SETFOCUS)
 			{
 				SetDlgItemText(hWnd, IDC_TEXT_WORD, L"");
@@ -140,6 +141,11 @@ VOID GameProc::EnterTextProc(HWND hWnd)
 	if (add_score > 5)
 	{
 		GameProc::RemoveAllWords(TRUE);
+	}
+
+	if (add_score >= 10)
+	{
+		AppData.life = std::min(AppData.life + 1, 3);
 	}
 
 	InvalidateRect(hWnd, new RECT{ 0, 0, 640, 630 }, TRUE);
