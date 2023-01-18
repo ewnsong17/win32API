@@ -32,5 +32,6 @@ public:
 	static VOID EnterTextProc(HWND hWnd);
 	static VOID EscapeProc(HWND hWnd);
 	static VOID UseBombSkill(HWND hWnd);
+	static VOID CheckLevelUp();
 	static VOID RemoveAllWords(BOOL bAddScore);
 };

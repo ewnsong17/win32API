@@ -379,13 +379,36 @@ VOID GameProc::UpdateWords(unsigned int& index, unsigned int& next_index)
 		next_index %= (AppData.level_cool_l[(long long) AppData.level - 1] - AppData.level_cool_f[(long long) AppData.level - 1] + 1); // 0 ~ 3
 		next_index += AppData.level_cool_f[(long long) AppData.level - 1]; // 3 ~ 6
 
-		for (int i = 0; i < AppData.level_count[(long long) AppData.level - 1]; i++)
+		float count = AppData.level_count[(long long)AppData.level - 1];
+
+		if (ceilf(count) == count)
 		{
-			Word word_ = AppData.GetNextWord();
-			unsigned int x;
-			rand_s(&x);
-			Word* word = new Word(35 + (x % 515) - wcslen(word_.word), (i == 0 ? 5 : 55), word_.word, word_.score, word_.weight);
-			AppData.words.push_back(word);
+			for (int i = 0; i < count; i++)
+			{
+				Word word_ = AppData.GetNextWord();
+				unsigned int x;
+				rand_s(&x);
+				Word* word = new Word(35 + (x % 515) - wcslen(word_.word), (i == 0 ? 5 : 55), word_.word, word_.score, word_.weight);
+				AppData.words.push_back(word);
+			}
+		}
+		else
+		{
+			unsigned int r_cnt;
+			int cnt = round(count);
+
+			rand_s(&r_cnt);
+
+			r_cnt %= cnt;
+
+			for (int i = 0; i < r_cnt + 1; i++)
+			{
+				Word word_ = AppData.GetNextWord();
+				unsigned int x;
+				rand_s(&x);
+				Word* word = new Word(35 + (x % 515) - wcslen(word_.word), (i == 0 ? 5 : 55), word_.word, word_.score, word_.weight);
+				AppData.words.push_back(word);
+			}
 		}
 	}
 

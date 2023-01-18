@@ -127,15 +127,7 @@ VOID GameProc::EnterTextProc(HWND hWnd)
 		{
 			add_score = (*iter)->score;
 			AppData.score += add_score;
-			if (AppData.level <= 10 && AppData.score >= AppData.exp[(long long) AppData.level - 1])
-			{
-				AppData.level++;
-				AppData.life = std::min(3, AppData.life + 1);
-				if (AppData.level == 6 || AppData.level == 11)
-				{
-					AppData.bomb = std::min(3, AppData.bomb + 1);
-				}
-			}
+			GameProc::CheckLevelUp();
 
 			free(*iter);
 			AppData.words.erase(iter);
@@ -174,6 +166,19 @@ VOID GameProc::EscapeProc(HWND hWnd)
 	UpdateWindow(hWnd);
 }
 
+VOID GameProc::CheckLevelUp()
+{
+	if (AppData.level <= 10 && AppData.score >= AppData.exp[(long long)AppData.level - 1])
+	{
+		AppData.level++;
+		AppData.life = std::min(3, AppData.life + 1);
+		if (AppData.level == 6 || AppData.level == 11)
+		{
+			AppData.bomb = std::min(3, AppData.bomb + 1);
+		}
+	}
+}
+
 VOID GameProc::UseBombSkill(HWND hWnd)
 {
 	if (AppData.bomb > 0)
@@ -198,6 +203,11 @@ VOID GameProc::RemoveAllWords(BOOL bAddScore)
 		}
 
 		free(*iter);
+	}
+
+	if (bAddScore)
+	{
+		GameProc::CheckLevelUp();
 	}
 
 	AppData.words.clear();

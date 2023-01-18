@@ -78,8 +78,7 @@ INT GameAppWindow::ShowWndWindow()
 LRESULT CALLBACK GameAppWindow::KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
 	PKBDLLHOOKSTRUCT key = (PKBDLLHOOKSTRUCT)lParam;
-
-	if (wParam == WM_KEYDOWN && nCode == HC_ACTION)
+	if (wParam == WM_KEYDOWN && nCode == HC_ACTION && GetForegroundWindow() == GameApp.h_wnd)
 	{
 		switch (key->vkCode)
 		{
