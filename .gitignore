@@ -11,15 +11,15 @@
 *.userprefs
 
 # Build results
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-x64/
-x86/
-bld/
-[Bb]in/
-[Oo]bj/
+GameApp/[Dd]ebug/
+GameApp/[Dd]ebugPublic/
+GameApp/[Rr]elease/
+GameApp/[Rr]eleases/
+GameApp/x64/
+GameApp/x86/
+GameApp/bld/
+GameApp/[Bb]in/
+GameApp/[Oo]bj/
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -27,8 +27,8 @@ bld/
 #wwwroot/
 
 # MSTest test Results
-[Tt]est[Rr]esult*/
-[Bb]uild[Ll]og.*
+GameApp/[Tt]est[Rr]esult*/
+GameApp/[Bb]uild[Ll]og.*
 
 # NUNIT
 *.VisualState.xml
